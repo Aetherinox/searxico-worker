@@ -52,6 +52,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 - [Install Dependencies](#install-dependencies)
 - [Deploy Test Server](#deploy-test-server)
 - [Publish Worker to Cloudflare](#publish-worker-to-cloudflare)
+- [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng)
 - [Contributors ✨](#contributors-)
 
 <br />
@@ -485,6 +486,114 @@ You should get a very detailed graph and hard numbers showing what your usage is
 <br />
 
 <p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/3.png"></p>
+
+<br />
+
+---
+
+<br />
+
+## Adding Your Favicon Worker to SearXNG
+To use your new Favicon grabber service with SearXNG, we need to create a new file within SearXNG.
+
+```shell
+searxng/favicons.toml
+```
+
+<br />
+
+You should create the file above in the same folder where your other SearXNG configs are, such as:
+- `limiter.toml`
+- `settings.yml`
+- `uwsgi.ini`
+
+<br />
+
+Open the new `favicons.toml` file and add the following:
+
+```toml
+[favicons]
+cfg_schema = 1   # config's schema version no.
+
+[favicons.proxy.resolver_map]
+"searxico" = "searx.plugins.searxico.searxico"
+# "duckduckgo" = "searx.favicons.resolvers.duckduckgo"
+# "searxico" = "searx.favicons.resolvers.searxico"
+# "yandex" = "searx.favicons.resolvers.yandex"
+```
+
+<br />
+
+If you want multiple favicon servies enabled, uncomment the lines above by removing the `#` for whatever services you want to enable.
+
+<br />
+
+You can also open your `settings.yml` and set the default favicon service you want to use:
+
+```yml
+search:
+  # backend for the favicon near URL in search results.
+  # Available resolvers: "allesedv", "duckduckgo", "google", "yandex" - leave blank to turn it off by default.
+  favicon_resolver: "searxico"
+```
+
+<br />
+
+Finally, we need to add the plugin file to `/searxng/plugins/`, so create a new file called `searxico.py` and add the following code to it:
+
+```py
+"""Adds custom favicon grabber
+@plugin     : searxico
+@url        : https://github.com/Aetherinox/searxico-worker
+@url-cdn    : https://github.com/Aetherinox/searxico-cdn
+"""
+
+from __future__ import annotations
+from typing import Callable
+from searx import network
+from searx.plugins import logger
+from flask_babel import gettext
+
+DEFAULT_RESOLVER_MAP: dict[str, Callable]
+logger = logger.getChild('favicons.resolvers')
+
+name = "Searxico"
+description = gettext("Fetch favicons using Searxico favicon grabber")
+default_on = True
+plugin_id = 'searxico'
+
+logger = logger.getChild(plugin_id)
+
+def _req_args(**kwargs):
+    d = {"raise_for_httperror": False}
+    d.update(kwargs)
+    return d
+
+def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
+    """Favicon Resolver from searxico"""
+    data, mime = (None, None)
+    url = f"https://searxico.aetherinox.workers.dev/get/{domain}/32"
+    logger.debug("fetch favicon from: %s", url)
+
+    response = network.get(url, **_req_args(timeout=timeout))
+    if response and response.status_code == 200 and len(response.content) > 70:
+        mime = response.headers['Content-Type']
+        data = response.content
+    return data, mime
+
+```
+
+<br />
+
+You should now have all of the things required for your favicon service to work. Head over to your SearXNG website and click on **Preferences**. Under the **General** tab, find the setting `Favicon Resolver` and change it to:
+- Searxico
+
+<br />
+
+<p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/searxng/1.png"></p>
+
+<br />
+
 
 <br />
 
