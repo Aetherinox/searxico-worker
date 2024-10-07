@@ -264,7 +264,7 @@ Your operating system web browser should open. Sign into your Cloudflare, and a 
 After you sign in and approve the permissions; you should see the following in your terminal:
 
 ```
-$ wrangler login
+$ npx wrangler login
 Attempting to login via OAuth...
 Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=xxxxx
 Successfully logged in.
@@ -582,6 +582,11 @@ def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
     return data, mime
 
 ```
+
+<br />
+
+In the code above, change the URL to your custom domain, or your Cloudflare worker:
+- `url = f"https://searxico.aetherinox.workers.dev/get/{domain}/32"`
 
 <br />
 
