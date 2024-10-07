@@ -1,0 +1,8 @@
+{
+    "name": "Download favicons from websites with CORS",
+    "description": "SearXNG self-hosted favicon cloudflare worker",
+    "repository": "https://github.com/Aetherinox/searxico-worker",
+    "logo": "https://cdn.jsdelivr.net/gh/heroku/node-js-getting-started/public/node.svg",
+    "keywords": ["favicon", "searxng", "searxico", "cloudflare", "worker", "node", "aetherinox"],
+    "image": "aetherinox/searxico-worker"
+}

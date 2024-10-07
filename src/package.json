@@ -1,0 +1,39 @@
+{
+    "name": "@aetherinox/searxico-worker",
+    "version": "1.0.0",
+    "description": "Get the favicon of a URL",
+    "homepage": "https://github.com/aetherinox/searxico-worker",
+    "author": "Aetherinox <adminservx@proton.me>",
+    "contributors": [
+        {
+            "name": "Aetherinox",
+            "email": "118329232+Aetherinox@users.noreply.github.com",
+            "url": "https://github.com/Aetherinox"
+        },
+        {
+            "name": "EuropaServ",
+            "email": "118329232+Aetherinox@users.noreply.github.com",
+            "url": "https://github.com/EuropaServ"
+        }
+  ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Aetherinox/searxico-worker.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Aetherinox/searxico-worker/issues"
+    },
+    "license": "MIT",
+    "keywords": [
+        "aetherinox",
+        "searxng",
+        "searxico",
+        "favicon",
+        "cloudflare",
+        "worker"
+    ],
+    "main": "index.js"
+}
