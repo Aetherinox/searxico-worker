@@ -53,6 +53,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 - [Deploy Test Server](#deploy-test-server)
 - [Publish Worker to Cloudflare](#publish-worker-to-cloudflare)
 - [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng)
+- [Cloudflare Loadbalancing](#cloudflare-loadbalancing)
 - [Contributors ✨](#contributors-)
 
 <br />
@@ -599,6 +600,51 @@ You should now have all of the things required for your favicon service to work.
 
 <br />
 
+---
+
+<br />
+
+## Cloudflare Loadbalancing
+In a previous section, [Publish Worker to Cloudflare](#publish-worker-to-cloudflare), we discussed the fact that Cloudflare puts a limit on each account at 100,000 requests per day. Should there be a reason why you are hosting a public instance of SearXNG, you can also set up load-balancing and provisions off the workload between multiple Cloudflare accounts if you have a team of people working with you.
+
+<br />
+
+SearXNG gives you the ability to select more than one favicon resolver. This means that you can call a second Cloudflare account into service, and add both of these workers into your SearXNG settings. Then when a user performs a search within your search engine, the requests for favicons will be split between both workers instead of them all being sent to one.
+
+<br />
+
+Within your `favicons.toml` file, you can list the different workers you have performing favicon queries:
+
+```toml
+[favicons]
+cfg_schema = 1   # config's schema version no.
+
+[favicons.proxy.resolver_map]
+"Searxico Server 1" = "searx.plugins.searxico.searxico1"
+"Searxico Server 2" = "searx.plugins.searxico.searxico2"
+```
+
+<br />
+
+With these settings in place, the other step is to take the code provided in the section [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng), and create two plugin files instead of one, ensuring each plugin is slightly modified with the updated name.
+
+```py
+name = "Searxico 1"
+plugin_id = 'searxico1'
+
+logger = logger.getChild(plugin_id)
+
+def _req_args(**kwargs):
+    d = {"raise_for_httperror": False}
+    d.update(kwargs)
+    return d
+
+def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
+```
+
+<br />
+
+Then simply save the plugin file as `/plugins/searxico1.py`.
 
 <br />
 
