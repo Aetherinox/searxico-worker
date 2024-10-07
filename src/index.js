@@ -434,15 +434,15 @@ export default {
         /*
             Assignment Map
 
-                                          searchDomain
-                                           |────────|
+                                     searchDomain
+                                      |────────|
             http://127.0.0.1:8787/get/searxng.org
                   ^─────────────^^──^
                     headersHost  subdomain
                                 ^───────────────────^
-                                 reqURL.pathname
-            ^───────────────────────────────────────^
-                    reqURL     ||     req.url
+                                   reqURL.pathname
+            ^───────────────────────────────────^
+                   reqURL     ||    req.url
         */
 
         const cacheKey = new Request(reqURL.toString(), req);
