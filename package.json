@@ -63,5 +63,10 @@
         "rollup-plugin-node-polyfills": "^0.2.1",
         "uuid": "^10.0.0",
         "wrangler": "^3.80.0"
+    },
+    "overrides": {
+        "wrangler": {
+            "fill-range": "~7.1.1"
+        }
     }
 }
