@@ -1,12 +1,21 @@
 /*
-    Searxico Favicon Cloudflare Worker > v2
+    Searxico Favicon Cloudflare Worker > v1
 
     @authors    : Aetherinox, github.com/aetherinox
-    @base       : SearXNG
+    @app        : SearXNG
     @repo       : https://github.com/Aetherinox/searxico-worker
+    @repo-cdn   : https://github.com/Aetherinox/searxico-cdn
+
+    @ABOUT      : This cloudflare worker gives you the ability to host your
+                  own favicon grabber.
 
     @TODO       : script needs to be refactored to clean up a few things.
                   add ability to specify custom favicon service.
+
+    @USAGE      : https://sub.domain.com/get/<DOMAIN.COM>/<ICON_SIZE>
+                  https://searxico.aetherinox.workers.dev/get/
+                  https://searxico.aetherinox.workers.dev/get/domain.com/iconsize
+                  https://searxico.aetherinox.workers.dev/get/domain.com/64
 
     List of favicon services::
         - https://www.google.com/s2/favicons?domain_url={DOMAIN}&sz={ICON_SIZE}
@@ -22,31 +31,35 @@
 
 */
 
-const version =`2.0.1`;
+const version =`1.0.0`;
 const serviceApi = `https://s2.googleusercontent.com/s2/favicons?domain={DOMAIN}&sz={ICON_SIZE}`;
 const serviceApiBackup = `https://icons.duckduckgo.com/ip3/{DOMAIN}.ico`;
-const serviceBackup = 'https://raw.githubusercontent.com/Aetherinox/favicon-cdn/main';
+const serviceBackup = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
 const faviconSvg = 'data:image/svg+xml,';
-const subdomain = 'favicon';
+const subdomain = 'get';
 const workerId = 'searxico-worker';
 
 /*
     Maps
 
     for privacy reasons, the official list of blocked ips are not published here.
+
+    The blacklist map is defined as `mapBlacklist`. The IP included below is
+    simply an example.
 */
 
 const mapAllowedNextCheckList = new Map();
 const mapDailyLimit = new Map();
-const mapBlockedIps = new Map([['127.0.0.11:8787', 'Abuse']]);
+const mapBlacklist = new Map([['127.0.0.11:8787', 'Abuse']]);
 
 /*
     Icon Loader Priority:
-        - cdn repo
-        - iconsOverrideIco (ico + png)
-        - iconsOverrideSvg (svg)
-        - api service (ddg, yandex, faviconkit, f1, unavatar)
-        - favicoDefaultSvg
+        - Self-hosted CDN Repository    https://github.com/Aetherinox/searxico-cdn
+        - Localized Override Table      (URLs) (ico + png)              [iconsOverrideIco]
+        - Localized Override Table      (svg)                           [iconsOverrideSvg]
+        - API Service                   (ddg, yandex, faviconkit, f1, unavatar)
+        - Domain Code Scan              (html - link, svg)
+        - Default Logo                                                  [favicoDefaultSvg]
 */
 
 /*
@@ -109,6 +122,7 @@ function throwHelp(env, host, subdomain) {
     return new Response(
         `Searxico Favicon Grabber ${version} \n\n` +
             `@usage ...... GET ${host}/${subdomain}/domain.com \n` +
+            `              GET ${host}/${subdomain}/domain.com/ICON_SIZE \n` +
             '@repo: ...... https://github.com/Aetherinox/searxico-worker \n' +
             '@cdn: ....... https://github.com/Aetherinox/searxico-cdn \n' +
             '@author: ...  github.com/aetherinox \n'
@@ -167,48 +181,16 @@ function handleIconName(url) {
 }
 
 /*
-    daily limit
-
-    each ip address is limited to 500 successful requests per day.
-    does not count toward the limit if throttled
-
-    @arg        : obj env
-    @arg        : str clientIp
-    @arg        : Date now
-    @returns    : bool
-*/
-
-async function dailyLimit(env, clientIp, now) {
-    if (!env.THROTTLE_DAILY_ENABLED) {
-        return false;
-    }
-
-    let bBlock = false;
-
-    const THROTTLE_DAILY_LIMIT = env.THROTTLE_DAILY_LIMIT || 500;
-
-    let getDailyCount = mapDailyLimit.get(clientIp);
-    if (!getDailyCount || isNaN(getDailyCount)) {
-        getDailyCount = 0;
-    }
-
-    if (getDailyCount >= THROTTLE_DAILY_LIMIT) {
-        bBlock = true;
-    }
-
-    if (!bBlock || bBlock === 'false') {
-        getDailyCount++;
-        mapDailyLimit.set(clientIp, getDailyCount);
-    }
-
-    return bBlock;
-}
-
-/*
     Method > Throttle
 
-    original version developed by https://github.com/antelle
-    new version developed for cloudflare worker
+    Throttles the connection to set a certain duration before client can attempt to fetch
+    another favicon.
+
+    THROTTLE_AGGRESSIVE will add an incremental punishment onto the client each time they attempt
+    to grab a favicon when their original cooldown period has not yet expired.
+
+    THROTTLE_AGGRESSIVE_PUNISH_MS determines the amount of time to add onto the punishment.
+    Requires THROTTLE_AGGRESSIVE = true
 
     @arg	    : obj env
     @arg	    : str clientIp
@@ -279,6 +261,44 @@ async function needThrottle(env, clientIp, now) {
 }
 
 /*
+    daily limit
+
+    each ip address is limited to 500 successful requests per day.
+    does not count toward the limit if throttled
+
+    @arg        : obj env
+    @arg        : str clientIp
+    @arg        : Date now
+    @returns    : bool
+*/
+
+async function dailyLimit(env, clientIp, now) {
+    if (!env.THROTTLE_DAILY_ENABLED) {
+        return false;
+    }
+
+    let bBlock = false;
+
+    const THROTTLE_DAILY_LIMIT = env.THROTTLE_DAILY_LIMIT || 500;
+
+    let getDailyCount = mapDailyLimit.get(clientIp);
+    if (!getDailyCount || isNaN(getDailyCount)) {
+        getDailyCount = 0;
+    }
+
+    if (getDailyCount >= THROTTLE_DAILY_LIMIT) {
+        bBlock = true;
+    }
+
+    if (!bBlock || bBlock === 'false') {
+        getDailyCount++;
+        mapDailyLimit.set(clientIp, getDailyCount);
+    }
+
+    return bBlock;
+}
+
+/*
     converts milliseconds to a human readable string
         01m 23s
 
@@ -298,20 +318,20 @@ function msToHuman(ms) {
 
 export default {
     /*
-        @arg        : obj request
+        @arg        : obj req
         @arg        : obj env
         @arg        : obj ctx
         @returns    : Response
     */
 
-    async fetch(request, env, ctx) {
+    async fetch(req, env, ctx) {
         const init = {
             headers: { 'content-type': 'text/html;charset=UTF-8' },
             redirect: 'follow'
         };
 
         // returns base domain without any params
-        const headersHost = request.headers.get('host') || '';
+        const headersHost = req.headers.get('host') || '';
 
         /*
             Security Headers
@@ -348,18 +368,18 @@ export default {
             pathname 			= /domain.com
         */
 
-        const requestURL = new URL(request.url); // returns base domain + params
+        const reqURL = new URL(req.url); // returns base domain + params
         const baseRegex = new RegExp(
-            /^(https?:\/\/)?(127.0.0.1:(\d+)|favicon.aetherinox.workers.dev|favicon.searxico.workers.dev)\/?$/,
+            /^(https?:\/\/)?(127.0.0.1:(\d+)|searxico.aetherinox.workers.dev|searxico.searxico.workers.dev)\/?$/,
             'ig'
         );
-        const bIsBaseOnly = baseRegex.test(requestURL); // triggered only when base URL is used without arguments
+        const bIsBaseOnly = baseRegex.test(reqURL); // triggered only when base URL is used without arguments
 
         /*
             default page
         */
 
-        if (bIsBaseOnly || requestURL === headersHost) {
+        if (bIsBaseOnly || reqURL === headersHost) {
             return throwHelp(env, headersHost, subdomain);
         }
 
@@ -367,20 +387,20 @@ export default {
             check subdomain value
 
             subdomain has everything after the base domain
-                subdomain   => favicon
+                subdomain   => get
 
-            use regex '/^\/favicon\/?(.*)$/gim' to ensure subdomain starts with:
-                - /favicon/
+            use regex '/^\/get\/?(.*)$/gim' to ensure subdomain starts with:
+                - /get/
 
             example:
-                - https://x.x.0.1:8787/favicon/
+                - https://x.x.0.1:8787/get/
 
             last forward slash not required for this step.
             help info will be displayed in the next step.
         */
 
         const regexStartWith = new RegExp(`^\/${subdomain}\/?(.*)$`, 'igm');
-        const bStartsWith = regexStartWith.test(requestURL.pathname);
+        const bStartsWith = regexStartWith.test(reqURL.pathname);
 
         if (!bStartsWith) {
             return new Response(
@@ -393,11 +413,11 @@ export default {
             Get base domain
             this is everything starting with the first forward slash
 
-            https://x.x.0.1:8787/favicon        returns /favicon
-            https://x.x.0.1:8787/favicon/       returns empty string
+            https://x.x.0.1:8787/get        returns /get
+            https://x.x.0.1:8787/get/       returns empty string
         */
 
-        let searchDomain = requestURL.pathname.replace(`/${subdomain}/`, '');
+        let searchDomain = reqURL.pathname.replace(`/${subdomain}/`, '');
 
         /*
             throw help menu if searchDomain:
@@ -414,16 +434,16 @@ export default {
 
                                           searchDomain
                                            |────────|
-            http://127.0.0.1:8787/favicon/searxng.org
-                  ^──────────────^ ^───^
+            http://127.0.0.1:8787/get/searxng.org
+                  ^─────────────^^──^
                     headersHost  subdomain
                                 ^───────────────────^
-                                 requestURL.pathname
+                                 reqURL.pathname
             ^───────────────────────────────────────^
-                    requestURL || request.url
+                    reqURL     ||     req.url
         */
 
-        const cacheKey = new Request(requestURL.toString(), request);
+        const cacheKey = new Request(reqURL.toString(), req);
         const cache = caches.default;
 
         /*
@@ -432,8 +452,8 @@ export default {
         */
 
         const clientIp =
-            request.headers.get('cf-connecting-ip') ||
-            request.headers.get('x-real-ip') ||
+            req.headers.get('cf-connecting-ip') ||
+            req.headers.get('x-real-ip') ||
             headersHost;
 
         /*
@@ -442,8 +462,8 @@ export default {
             127.0.0.11:8787 for testing
         */
 
-        if (mapBlockedIps.has(clientIp)) {
-            const reason = mapBlockedIps.get(clientIp) || 'Blocked';
+        if (mapBlacklist.has(clientIp)) {
+            const reason = mapBlacklist.get(clientIp) || 'Blocked';
             console.log(`\x1b[32m[${workerId}]\x1b[0m BLOCK \x1b[33m[ip]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m Reason: \x1b[33m${reason}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`)
             return new Response(
                 `403 forbidden – you cannot access this service from ${clientIp}: Reason: ${reason}`,
@@ -455,7 +475,7 @@ export default {
             Block user-agents containing 'bot'
         */
 
-        const userAgent = request.headers.get('User-Agent') || '';
+        const userAgent = req.headers.get('User-Agent') || '';
         if (userAgent.includes('bot')) {
             console.log(`\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[user-agent-bot]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`)
             return new Response(`403 - Block User Agent containing bot`, { status: 403 });
@@ -511,12 +531,12 @@ export default {
 
         /*
             'searchDomain' can return either:
-                - http://searxng.org/favicon/searxng.org            => searxng.org
-                - http://searxng.org/favicon/https://searxng.org    => https://searxng.org
+                - http://searxng.org/get/searxng.org                => searxng.org
+                - http://searxng.org/get/https://searxng.org        => https://searxng.org
 
             'url' strips http/s if it exists at the beginnning of searchDomain.
-                - http://searxng.org/favicon/searxng.org            => searxng.org
-                - http://searxng.org/favicon/https://searxng.org    => searxng.org
+                - http://searxng.org/get/searxng.org                => searxng.org
+                - http://searxng.org/get/https://searxng.org        => searxng.org
 
             'targetUrl` returns object
                 - targetURL.origin
@@ -659,8 +679,8 @@ export default {
 
         /*
             url should be in the format:
-                - http://sub.domain.lan/favicon/youtube.com/64
-                - http://sub.domain.lan/favicon/{DOMAIN}/{ICON_SIZE}
+                - http://sub.domain.lan/get/youtube.com/64
+                - http://sub.domain.lan/get/{DOMAIN}/{ICON_SIZE}
 
             since users may add long and complex URLs to their vault, check if the 2nd argument
             is a number to represent the icon size; if not, set the default icon size.
