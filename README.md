@@ -12,7 +12,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 <br />
 
-<img src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/.assets/plugin_traefik_apikey_middleware.png" height="230">
+<img src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/banner.png" height="230">
 
 <br />
 <br />

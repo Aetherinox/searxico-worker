@@ -11,6 +11,12 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # #
+#   sources
+# #
+
+.src
+
+# #
 #   Private config files
 # #
 
