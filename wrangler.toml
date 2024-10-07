@@ -4,9 +4,9 @@
 
 name = "searxico"
 main = "src/index.js"
-compatibility_date = "2024-10-06"
 workers_dev = true
-node_compat = true
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-09-23"
 
 # The rate limiting API is in open beta.
 [[unsafe.bindings]]
