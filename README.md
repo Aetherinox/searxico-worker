@@ -56,6 +56,16 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
   - [Deploy Worker](#deploy-worker)
 - [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng)
 - [Cloudflare Loadbalancing](#cloudflare-loadbalancing)
+- [Developer Notes](#developer-notes)
+  - [wrangler.toml](#wranglertoml)
+  - [Wrangler Commands](#wrangler-commands)
+    - [Update Wrangle](#update-wrangle)
+    - [Launch Dev Server](#launch-dev-server)
+    - [Login](#login)
+    - [Whoami](#whoami)
+    - [List Packages](#list-packages)
+    - [Deploy](#deploy)
+    - [Delete](#delete)
 - [Contributors ✨](#contributors-)
 
 <br />
@@ -398,7 +408,12 @@ Now we can proceed onto the final part of this documentation which explains on h
 The last part of this guide explains how to publish your worker to Cloudflare.
 
 ### ⚠ Windows User Exposed
-When you build a wrangler worker and deploy the container to Cloudflare, a file with the extension `.js` will be created, and will display what folder wrangler was installed in. By default, this will show as `C:\Users\USERNAME\AppData\Roaming\npm\node_modules\wrangler`. You can see this by going to Cloudflare, clicking `Workers & Pages`, and clicking `View Code` to the top right.
+When you build a wrangler worker and deploy the container to Cloudflare, a file with the extension `.js` will be created, and will display what folder wrangler was installed in. By default, this will show as 
+- `C:\Users\USERNAME\AppData\Roaming\npm\node_modules\wrangler`. 
+
+<br />
+
+You can see this by going to Cloudflare, clicking `Workers & Pages`, and clicking `View Code` to the top right.
 
 In order to hide your user path in the code, you must do one of the following:
 - Change where NPM is installed for your user path to be removed.
@@ -674,6 +689,138 @@ def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
 <br />
 
 Then simply save the plugin file as `/plugins/searxico1.py`.
+
+<br />
+
+---
+
+<br />
+
+## Developer Notes
+These are notes you should keep in mind if you plan on modifying this favicon Cloudflare worker.
+
+<br />
+
+### wrangler.toml
+We recommend treating your `wrangler.toml` file as the source of truth for your Worker configuration, and to avoid making changes to your Worker via the Cloudflare dashboard if you are using Wrangler.
+
+If you need to make changes to your Worker from the Cloudflare dashboard, the dashboard will generate a TOML snippet for you to copy into your `wrangler.toml` file, which will help ensure your `wrangler.toml` file is always up to date.
+
+If you change your environment variables in the Cloudflare dashboard, Wrangler will override them the next time you deploy. If you want to disable this behavior, add `keep_vars = true` to your `wrangler.toml`.
+
+If you change your routes in the dashboard, Wrangler will override them in the next deploy with the routes you have set in your `wrangler.toml`. To manage routes via the Cloudflare dashboard only, remove any route and routes keys from your `wrangler.toml` file. Then add `workers_dev = false` to your `wrangler.toml` file. For more information, refer to [Deprecations](https://developers.cloudflare.com/workers/wrangler/deprecations/#other-deprecated-behavior).
+
+Wrangler will not delete your secrets (encrypted environment variables) unless you run `wrangler secret delete <key>`.
+
+<br />
+
+> [!NOTE] Experimental Config
+> Wrangler currently supports an `--experimental-json-config` flag, which will read your configuration from a `wrangler.json` file, rather than `wrangler.toml`. The format of this file is exactly the same as the `wrangler.toml` configuration file, except that the syntax is `JSON` rather than `TOML`. 
+> 
+> This is experimental, and is not recommended for production use.
+
+<br /> <br />
+
+### Wrangler Commands
+This section provides a reference for Wrangler commands.
+
+```shell ignore
+wrangler <COMMAND> <SUBCOMMAND> [PARAMETERS] [OPTIONS]
+```
+
+<br />
+
+Since Cloudflare recommends [installing Wrangler locally](https://developers.cloudflare.com/workers/wrangler/install-and-update/) in your project(rather than globally), the way to run Wrangler will depend on your specific setup and package manager.
+
+- [npm](https://developers.cloudflare.com/workers/wrangler/commands/#)
+- [yarn](https://developers.cloudflare.com/workers/wrangler/commands/#)
+- [pnpm](https://developers.cloudflare.com/workers/wrangler/commands/#)
+
+<br />
+
+After you have access to wrangler globally, you can switch over from using `npx wrangler` to just `wrangler`:
+
+```shell ignore
+npx wrangler <COMMAND> <SUBCOMMAND> [PARAMETERS] [OPTIONS]
+```
+
+<br />
+
+Full list of commands available at:
+- https://developers.cloudflare.com/workers/wrangler/commands/
+
+<br /> <br />
+
+#### Update Wrangle
+To update the version of Wrangler used in your project, run:
+
+```shell ignore
+npm install wrangler@latest
+```
+
+<br /> <br />
+
+#### Launch Dev Server
+Launches your local wrangler / cloudflare dev project in a test environment.
+
+```shell ignore
+wrangler dev
+```
+
+<br /> <br />
+
+#### Login
+Authorize Wrangler with your Cloudflare account using OAuth. Wrangler will attempt to automatically open your web browser to login with your Cloudflare account.
+If you prefer to use API tokens for authentication, such as in headless or continuous integration environments, refer to [Running Wrangler in CI/CD](https://developers.cloudflare.com/workers/wrangler/ci-cd/).
+
+If Wrangler fails to open a browser, you can copy and paste the URL generated by `wrangler login` in your terminal into a browser and log in.
+
+```shell ignore
+wrangler login [OPTIONS]
+```
+
+<br /> <br />
+
+#### Whoami
+Lists all accounts associated with your Cloudflare account
+
+```shell ignore
+wrangler whoami
+```
+
+<br /> <br />
+
+#### List Packages
+Check where wrangler (and other global packages) are installed at:
+
+```shell ignore
+npm list -g --depth=0
+```
+
+<br /> <br />
+
+#### Deploy
+Deploy your Worker to Cloudflare.
+
+```shell ignore
+wrangler deploy [<SCRIPT>] [OPTIONS]
+```
+
+```shell ignore
+wrangler deploy --minify
+```
+
+> [!NOTE] OPTIONS
+> None of the options for this command are required. Also, many can be set in your `wrangler.toml` file. Refer to the [`wrangler.toml` configuration](https://developers.cloudflare.com/workers/wrangler/configuration/) documentation for more information.
+
+<br /> <br />
+
+#### Delete
+Delete your Worker and all associated Cloudflare developer platform resources.
+
+```shell ignore
+wrangler delete [<SCRIPT>] [OPTIONS]
+```
 
 <br />
 
