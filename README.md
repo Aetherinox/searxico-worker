@@ -49,7 +49,9 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
   - [API Service](#api-service)
   - [Domain Code Scan](#domain-code-scan)
   - [Default Logo](#default-logo)
-- [Cloudflare Limits](#cloudflare-limits)
+- [Install Dependencies](#install-dependencies)
+- [Deploy Test Server](#deploy-test-server)
+- [Publish Worker to Cloudflare](#publish-worker-to-cloudflare)
 - [Contributors ✨](#contributors-)
 
 <br />
@@ -198,7 +200,258 @@ It should be worth noting that a test was conducted with over 1,000 domains. Out
 
 <br />
 
-## Cloudflare Limits
+## Install Dependencies
+You will need to register for a Cloudflare account if you have not already. First, we need to grab the files from this repo. Create a new project folder where everything will be stored.
+
+```shell
+git clone https://github.com/Aetherinox/searxico-worker.git ./searxico
+```
+
+<br />
+
+You must have `npm` installed. If you don't, you'll need to install it first. If you are on **Windows**, follow the [Installation Guide here](https://phoenixnap.com/kb/install-node-js-npm-on-windows).
+
+<br />
+
+If you are on **Linux**, you can install with:
+
+```shell
+sudo apt install npm
+```
+
+<br />
+
+Next, open your terminal / command prompt for Windows / Linux, change directories over to the folder where you downloaded Searxico and install the Node dependencies by running the commands:
+
+```
+cd searxico
+npm install
+```
+
+<br />
+
+If you get any **deprecation** warnings, ignore them. A few packages need to be migrated to their new fork packages. Next, confirm that Wrangler is installed by running the command:
+
+```shell
+npx wrangler -v
+```
+
+<br />
+
+You should receive:
+```console
+ ⛅️ wrangler 3.80.0
+-------------------
+```
+
+<br />
+
+Next, you need to sign into Cloudflare using Wrangler so that the app knows where to upload your Favicon worker to:
+
+```shell
+npx wrangler login
+```
+
+Your operating system web browser should open. Sign into your Cloudflare, and a permission box should appear asking you to confirm that Wrangler should be able to access your Cloudflare account. 
+
+<br />
+
+<p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/4.png"></p>
+
+<br />
+
+After you sign in and approve the permissions; you should see the following in your terminal:
+
+```
+$ wrangler login
+Attempting to login via OAuth...
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=xxxxx
+Successfully logged in.
+▲ [WARNING] Processing wrangler.toml configuration:
+```
+
+<br />
+
+To confirm it worked, type the command:
+```shell
+npx wrangler whoami
+```
+
+<br />
+
+You should see:
+```console
+ ⛅️ wrangler 3.80.0
+-------------------
+
+Getting User settings...
+👋 You are logged in with an OAuth Token, associated with the email me@domain.lan.
+┌─────────────────────────────────┬──────────────────────────────────┐
+│ Account Name                    │ Account ID                       │
+├─────────────────────────────────┼──────────────────────────────────┤
+│ me@domain.lan's Account         │ abcdefg123456789a1b2c3d4c5e6f7ab │
+└─────────────────────────────────┴──────────────────────────────────┘
+🔓 Token Permissions: If scopes are missing, you may need to logout and re-login.
+Scope (Access)
+```
+
+<br />
+
+You now have everything set up and can begin to either make edits to the source code within `/src/index.js`, or you can move on to the next step of the guide which explains how to launch a dev server, or deploy the worker to Cloudflare.
+
+<br />
+
+---
+
+<br />
+
+## Deploy Test Server
+Now that you finished the above section [Install Dependencies](#install-dependencies), we can now launch a development server so that you can test the worker locally. Back in your terminal, run the command:
+
+```shell
+npx wrangler dev
+```
+
+<br />
+
+You should see the following in terminal:
+```
+ ⛅️ wrangler 3.80.0
+-------------------
+
+Your worker has access to the following bindings:
+- Unsafe:
+  - ratelimit: searxico
+- Vars:
+  - THROTTLE_DELAY_MS: 0
+  - THROTTLE_AGGRESSIVE: false
+  - THROTTLE_AGGRESSIVE_PUNISH_MS: 5000
+  - THROTTLE_DAILY_ENABLED: false
+  - THROTTLE_DAILY_LIMIT: 2000
+⎔ Starting local server...
+[wrangler:inf] Ready on http://localhost:8787
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│  [b] open a browser, [d] open devtools, [l] turn off local mode, [c] clear console, [x] to exit  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+<br />
+
+As the instructions say, open your operating system web browser and navigate to the url:
+```
+http://localhost:8787/get
+```
+
+<br />
+
+> [!NOTE]
+> Add the word `/get` to the end of the URL above, as that is the end-point for the favicon grabber. 
+>
+> I am currently working on an additional setting which will allow you tp specify if you want the favicon grabber to reside in the base domain without a sub-route.
+
+<br >
+
+You should now see the favicon homepage:
+
+```
+Searxico Favicon Grabber 1.0.0 
+
+@usage ...... GET localhost:8787/get/domain.com 
+              GET localhost:8787/get/domain.com/ICON_SIZE 
+@repo: ...... https://github.com/Aetherinox/searxico-worker 
+@cdn: ....... https://github.com/Aetherinox/searxico-cdn 
+@author: ...  github.com/aetherinox 
+```
+
+<br />
+
+If you want to test out getting an icon, pick a domain and add it to the end of the URL:
+```
+http://localhost:8787/get/searxng.org
+```
+
+<br />
+
+You should see the official SearXNG.org favicon, which confirms that this is working. If you wish to stop the development server, go back to your terminal and press `X`. Your terminal should list all of the available options you can pick from:
+
+```
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│  [b] open a browser, [d] open devtools, [l] turn off local mode, [c] clear console, [x] to exit  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+<br />
+
+Now we can proceed onto the final part of this documentation which explains on how to publish your worker to Cloudflare Proceed to the section [Publish Worker to Cloudflare](#publish-worker-to-cloudflare).
+
+<br />
+
+---
+
+<br />
+
+## Publish Worker to Cloudflare
+The last part of this guide explains how to publish your worker to Cloudflare. Go back to your Terminal, and execute the command:
+
+```shell
+npx wrangler deploy
+```
+
+<br />
+
+You will see a large amount of text in your terminal appear:
+
+```
+Total Upload: 65.15 KiB / gzip: 14.78 KiB
+Your worker has access to the following bindings:
+- Unsafe:
+  - ratelimit: searxico
+- Vars:
+  - THROTTLE_DELAY_MS: 0
+  - THROTTLE_AGGRESSIVE: false
+  - THROTTLE_AGGRESSIVE_PUNISH_MS: 5000
+  - THROTTLE_DAILY_ENABLED: false
+  - THROTTLE_DAILY_LIMIT: 2000
+Uploaded searxico (2.57 sec)
+Deployed searxico triggers (0.31 sec)
+  https://searxico.aetherinox.workers.dev
+Current Version ID: afe1c468-416e-1ff7-1ce6-42aa7490ef5c
+```
+
+<br />
+
+> [!NOTE]
+> If you have multiple accounts attached to Cloudflare, you will be asked to pick which account you want to upload your worker to.
+> 
+> ```console
+> √ Select an account » 
+> »   1. Brad
+> »   2. Domain.lan Organization
+> ```
+>
+> If you want to switch accounts, you must execute:
+> ```shell
+> npx wrangler login
+> ```
+
+<br />
+
+If you look at the second to last line, it will tell you what URL you can use to view the actual project online:
+
+```
+https://searxico.aetherinox.workers.dev
+```
+
+<br />
+
+You can use that domain listed above for any service you wish to use your Favicon grabber for. Cloudflare also supports you adding your own custom domain name onto the worker so that you can access it using a url such as `https://icons.mydomain.com`.
+
+<br />
+
+This concludes the basics of getting your worker up. There are a few things to remember.
+
+<br />
+
 For users who have a **Free** Cloudflare account, be aware that Cloudflare does place limits on how much traffic your worker can have. The limits are generous and if you are using this Cloudflare worker for your own personal site, you should not be surpassing them.
 
 <br />
