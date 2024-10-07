@@ -215,7 +215,7 @@ You can check your request limit by signing into Cloudflare, and on the left-sid
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/1.png"></p>
+<p align="center"><img style="width: 30%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/1.png"></p>
 
 <br />
 
@@ -223,7 +223,7 @@ Select your worker from the **Override** page.
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/1.png"></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/2.png"></p>
 
 <br />
 
@@ -231,7 +231,7 @@ You should get a very detailed graph and hard numbers showing what your usage is
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/3.png"></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/cloudflare/3.png"></p>
 
 <br />
 
