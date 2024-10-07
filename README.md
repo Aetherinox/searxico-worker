@@ -49,12 +49,12 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
   - [API Service](#api-service)
   - [Domain Code Scan](#domain-code-scan)
   - [Default Logo](#default-logo)
-- [Install Dependencies](#install-dependencies)
-- [Deploy Test Server](#deploy-test-server)
-- [Publish Worker to Cloudflare](#publish-worker-to-cloudflare)
+- [Step 1: Install Dependencies](#step-1-install-dependencies)
+- [Step 2: Deploy Test Server](#step-2-deploy-test-server)
+- [Step 3: Publish Worker to Cloudflare](#step-3-publish-worker-to-cloudflare)
   - [⚠ Windows User Exposed](#-windows-user-exposed)
   - [Deploy Worker](#deploy-worker)
-- [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng)
+- [Step 4: Adding Your Favicon Worker to SearXNG](#step-4-adding-your-favicon-worker-to-searxng)
 - [Cloudflare Loadbalancing](#cloudflare-loadbalancing)
 - [Developer Notes](#developer-notes)
   - [wrangler.toml](#wranglertoml)
@@ -214,7 +214,7 @@ It should be worth noting that a test was conducted with over 1,000 domains. Out
 
 <br />
 
-## Install Dependencies
+## Step 1: Install Dependencies
 You will need to register for a Cloudflare account if you have not already. First, we need to grab the files from this repo. Create a new project folder where everything will be stored.
 
 ```shell
@@ -319,7 +319,7 @@ You now have everything set up and can begin to either make edits to the source 
 
 <br />
 
-## Deploy Test Server
+## Step 2: Deploy Test Server
 Now that you finished the above section [Install Dependencies](#install-dependencies), we can now launch a development server so that you can test the worker locally. Back in your terminal, run the command:
 
 ```shell
@@ -404,7 +404,7 @@ Now we can proceed onto the final part of this documentation which explains on h
 
 <br />
 
-## Publish Worker to Cloudflare
+## Step 3: Publish Worker to Cloudflare
 The last part of this guide explains how to publish your worker to Cloudflare.
 
 ### ⚠ Windows User Exposed
@@ -538,7 +538,7 @@ You should get a very detailed graph and hard numbers showing what your usage is
 
 <br />
 
-## Adding Your Favicon Worker to SearXNG
+## Step 4: Adding Your Favicon Worker to SearXNG
 To use your new Favicon grabber service with SearXNG, we need to create a new file within SearXNG.
 
 ```shell
