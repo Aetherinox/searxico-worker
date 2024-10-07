@@ -31,7 +31,7 @@
 
 */
 
-const version =`1.0.0`;
+const version = `1.0.0`;
 const serviceApi = `https://s2.googleusercontent.com/s2/favicons?domain={DOMAIN}&sz={ICON_SIZE}`;
 const serviceApiBackup = `https://icons.duckduckgo.com/ip3/{DOMAIN}.ico`;
 const serviceBackup = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
@@ -165,7 +165,9 @@ function handleIconName(url) {
 
     // match full private ip to be replaced with 127.0.0.1
     // https://regex101.com/r/goz7vG/2
-    const urlLocalRegexMatch = hostname.match(/(^localhost)|(^127(\.\d{1,3}){3})|(^192\.168(\.\d{1,3}){2})|(^10(\.\d{1,3}){3})|(^172\.1[6-9](\.\d{1,3}){2})|(^172\.2[0-9](\.\d{1,3}){2})|(^172\.3[0-1](\.\d{1,3}){2})|(^\[?::1\]?)|(^[fF][cCdD])/gi);
+    const urlLocalRegexMatch = hostname.match(
+        /(^localhost)|(^127(\.\d{1,3}){3})|(^192\.168(\.\d{1,3}){2})|(^10(\.\d{1,3}){3})|(^172\.1[6-9](\.\d{1,3}){2})|(^172\.2[0-9](\.\d{1,3}){2})|(^172\.3[0-1](\.\d{1,3}){2})|(^\[?::1\]?)|(^[fF][cCdD])/gi
+    );
 
     // (bool) if ip is private
     const bIsLocalhost = urlLocalRegex.test(hostname);
@@ -177,7 +179,7 @@ function handleIconName(url) {
     iconName = hostname.replace(/[:]/g, '-'); // xxx.xxx.xxx.xxx-xxxx
     let baseName = hostname.split('.')[0]; // folder letter/
 
-    return [ baseName, iconName ];
+    return [baseName, iconName];
 }
 
 /*
@@ -452,9 +454,7 @@ export default {
         */
 
         const clientIp =
-            req.headers.get('cf-connecting-ip') ||
-            req.headers.get('x-real-ip') ||
-            headersHost;
+            req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || headersHost;
 
         /*
             Manually blocked IPs
@@ -464,7 +464,9 @@ export default {
 
         if (mapBlacklist.has(clientIp)) {
             const reason = mapBlacklist.get(clientIp) || 'Blocked';
-            console.log(`\x1b[32m[${workerId}]\x1b[0m BLOCK \x1b[33m[ip]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m Reason: \x1b[33m${reason}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m BLOCK \x1b[33m[ip]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m Reason: \x1b[33m${reason}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`
+            );
             return new Response(
                 `403 forbidden – you cannot access this service from ${clientIp}: Reason: ${reason}`,
                 { status: 403, reason: reason }
@@ -477,7 +479,9 @@ export default {
 
         const userAgent = req.headers.get('User-Agent') || '';
         if (userAgent.includes('bot')) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[user-agent-bot]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[user-agent-bot]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mForbidden\x1b[0m`
+            );
             return new Response(`403 - Block User Agent containing bot`, { status: 403 });
         }
 
@@ -491,7 +495,9 @@ export default {
         const nextAllowed = msToHuman(tsNextAllowed - now);
 
         if (bThrottle) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[throttle]\x1b[0m exeeded by \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m Next allowed in \x1b[33m${nextAllowed}\x1b[0m \x1b[90m|\x1b[0m daily total: \x1b[33m${userDailyLimit}\x1b[0m`);
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[throttle]\x1b[0m exeeded by \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m Next allowed in \x1b[33m${nextAllowed}\x1b[0m \x1b[90m|\x1b[0m daily total: \x1b[33m${userDailyLimit}\x1b[0m`
+            );
             return new Response(
                 `429 - Too many requests for ${clientIp}. must wait ${nextAllowed}. You have made ${userDailyLimit} total requests for the day.`,
                 { status: 429 }
@@ -505,7 +511,9 @@ export default {
         let bHitDailyLimit = await dailyLimit(env, clientIp, now);
 
         if (bHitDailyLimit) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[daily]\x1b[0m \x1b[33m${userDailyLimit}\x1b[0m exeeded by \x1b[31m${clientIp}\x1b[0m`);
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[daily]\x1b[0m \x1b[33m${userDailyLimit}\x1b[0m exeeded by \x1b[31m${clientIp}\x1b[0m`
+            );
             return new Response(
                 `429 - You have hit your daily limit of ${userDailyLimit} requests for ${clientIp}`,
                 { status: 429 }
@@ -523,7 +531,9 @@ export default {
         */
 
         if (!success) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[cloudflare]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mToo Many Requests\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LIMIT \x1b[33m[cloudflare]\x1b[0m detected for \x1b[31m${clientIp}\x1b[0m \x1b[90m|\x1b[0m \x1b[33mToo Many Requests\x1b[0m`
+            );
             return new Response(`429 Too Many Requests – rate limit exceeded for ${clientIp}`, {
                 status: 429
             });
@@ -558,7 +568,9 @@ export default {
 
         if (!response) {
             response = await fetch(targetURL.origin, init).catch(() => {
-                console.log(`\x1b[32m[${workerId}]\x1b[0m FETCH failed to get: \x1b[31m${targetURL.origin}\x1b[0m`)
+                console.log(
+                    `\x1b[32m[${workerId}]\x1b[0m FETCH failed to get: \x1b[31m${targetURL.origin}\x1b[0m`
+                );
             });
         }
 
@@ -575,7 +587,7 @@ export default {
             get domain icon short name
         */
 
-        const [ base, iconName ] = handleIconName(targetURL.origin);
+        const [base, iconName] = handleIconName(targetURL.origin);
         const baseFolder = base.charAt(0);
         const iconPath = `${baseFolder}/${iconName}`;
         const iconUrl = `${serviceBackup}/${baseFolder}/${iconName}.ico`;
@@ -601,7 +613,9 @@ export default {
 
         const iconRequest = new Request(iconUrl);
         if (iconRequest) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[cdn]\x1b[0m \x1b[33m${iconUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[cdn]\x1b[0m \x1b[33m${iconUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+            );
 
             const fetchIcoCdn = await fetch(`${iconUrl}`);
             if (fetchIcoCdn && fetchIcoCdn.status === 200) {
@@ -614,7 +628,6 @@ export default {
                 return resp;
             }
         }
-
 
         /*
             Icon Overrides > Local > Secondary
@@ -633,7 +646,9 @@ export default {
             const ext = iconsOverrideIco[iconPath].split(/[#?]/)[0].split('.').pop().trim();
 
             if (ext === 'png' || ext === 'ico') {
-                console.log(`\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[ico-png-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`)
+                console.log(
+                    `\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[ico-png-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                );
 
                 const fetchIcoPng = await fetch(iconsOverrideIco[iconPath]);
                 if (fetchIcoPng.status === 200) {
@@ -656,7 +671,9 @@ export default {
         */
 
         if (iconsOverrideSvg[iconPath]) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[svg-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[svg-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+            );
 
             let customSvgIcon = new Response(iconsOverrideSvg[iconPath], {
                 headers: {
@@ -724,8 +741,12 @@ export default {
         */
 
         if (!serviceResultIcon || serviceResultIcon.status !== 200) {
-            const _serviceQueryUrlBackup = serviceApiBackup.replace(/{(\w+)}/g, (phWithDelims, phNoDelims) =>
-                replacements.hasOwnProperty(phNoDelims) ? replacements[phNoDelims] : phWithDelims
+            const _serviceQueryUrlBackup = serviceApiBackup.replace(
+                /{(\w+)}/g,
+                (phWithDelims, phNoDelims) =>
+                    replacements.hasOwnProperty(phNoDelims)
+                        ? replacements[phNoDelims]
+                        : phWithDelims
             );
 
             serviceQueryUrl = `${_serviceQueryUrlBackup}`;
@@ -737,7 +758,9 @@ export default {
         */
 
         if (serviceResultIcon && serviceResultIcon.status === 200) {
-            console.log(`\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[api]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`)
+            console.log(
+                `\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[api]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+            );
 
             const resp = new Response(serviceResultIcon.body, {
                 headers: {
@@ -751,7 +774,7 @@ export default {
                 return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
                     headers: { 'content-type': 'image/svg+xml' },
                     ...DEFAULT_CORS_HEADERS
-                })
+                });
             }
 
             return resp;
@@ -784,7 +807,7 @@ export default {
                 let fetchIcon = await fetch(favicon);
 
                 const svgHtml = await fetchIcon.text();
-                const svgHtmlResize = svgHtml.replace('<svg',"<svg width='64' height='64'");
+                const svgHtmlResize = svgHtml.replace('<svg', "<svg width='64' height='64'");
 
                 const RespIcon = new Response(svgHtmlResize, fetchIcon, {
                     headers: {
@@ -794,7 +817,7 @@ export default {
                     }
                 });
 
-                return RespIcon
+                return RespIcon;
             }
         }
 
@@ -809,7 +832,9 @@ export default {
             }
         });
 
-        console.log(`\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[svg-default]\x1b[0m \x1b[31mNo Icon Found\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`)
+        console.log(
+            `\x1b[32m[${workerId}]\x1b[0m LOCATE \x1b[33m[svg-default]\x1b[0m \x1b[31mNo Icon Found\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+        );
 
         return favicoDefault;
     }
