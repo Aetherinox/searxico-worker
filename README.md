@@ -52,6 +52,8 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 - [Install Dependencies](#install-dependencies)
 - [Deploy Test Server](#deploy-test-server)
 - [Publish Worker to Cloudflare](#publish-worker-to-cloudflare)
+  - [⚠ Windows User Exposed](#-windows-user-exposed)
+  - [Deploy Worker](#deploy-worker)
 - [Adding Your Favicon Worker to SearXNG](#adding-your-favicon-worker-to-searxng)
 - [Cloudflare Loadbalancing](#cloudflare-loadbalancing)
 - [Contributors ✨](#contributors-)
@@ -393,7 +395,34 @@ Now we can proceed onto the final part of this documentation which explains on h
 <br />
 
 ## Publish Worker to Cloudflare
-The last part of this guide explains how to publish your worker to Cloudflare. Go back to your Terminal, and execute the command:
+The last part of this guide explains how to publish your worker to Cloudflare.
+
+### ⚠ Windows User Exposed
+When you build a wrangler worker and deploy the container to Cloudflare, a file with the extension `.js` will be created, and will display what folder wrangler was installed in. By default, this will show as `C:\Users\USERNAME\AppData\Roaming\npm\node_modules\wrangler`. You can see this by going to Cloudflare, clicking `Workers & Pages`, and clicking `View Code` to the top right.
+
+In order to hide your user path in the code, you must do one of the following:
+- Change where NPM is installed for your user path to be removed.
+- Deploy using `--minify`
+
+To change the installation path, execute:
+```shell ignore
+npm config --global set cache "X:\NodeJS\cache" 
+npm config --global set prefix "X:\NodeJS\npm"
+```
+
+You may need to re-install wrangler after changing the paths:
+```shell ignore
+npm uninstall wrangler --save-dev
+npm install wrangler --save-dev
+```
+
+If you do not want to reinstall wrangler, you can also keep the user path from showing in your source code by deploying your project with `--minify`
+```shell ignore
+wrangler deploy --minify
+```
+
+### Deploy Worker
+Go back to your Terminal, and execute the command:
 
 ```shell
 npx wrangler deploy
@@ -525,7 +554,7 @@ cfg_schema = 1   # config's schema version no.
 
 <br />
 
-If you want multiple favicon servies enabled, uncomment the lines above by removing the `#` for whatever services you want to enable.
+If you want multiple favicon services enabled, uncomment the lines above by removing the `#` for whatever services you want to enable.
 
 <br />
 
