@@ -98,17 +98,20 @@ If you have enabled the `subroute` setting in `src/index.js`, then you will need
 <br />
 
 This worker includes the following features:
-- Favicon override using a Github repository
+- Favicon override using a Github repository <sup> _`(self-hostable)`_ </sup>
 - Favicon override using locally provided image URL table
 - Favicon override using locally provided SVG path
 - Works with Google, Yandex, Duckduckgo, FaviconKit, Allesedv
 - Site code scanning for favicon tags, both `link` and `svg`
 - CORS Security Headers
 - Ability to set API rate limits <sup> _`(disabled by default)`_ </sup>
-  - Daily limits OR limit per X milliseconds
+  - Daily limits OR limit X per milliseconds
 - Aggressive throttling mode <sup> _`(disabled by default)`_ </sup>
   - Adds an incremental punishment onto the client's cooldown each time they attempt to grab a favicon when their original cooldown period has not yet expired.
-- Blacklist of IPs
+- IP blacklisting / banning
+- Supports sub-routes for users who want to add on `get`, `post` routes
+- Supports Cloudflare worker logs <sup> _`(beta)`_ </sup>
+- 
 
 <br />
 
@@ -358,7 +361,7 @@ Your worker has access to the following bindings:
 
 As the instructions say, open your operating system web browser and navigate to the url:
 ```
-http://localhost:8787/get
+http://localhost:8787
 ```
 
 <br />
