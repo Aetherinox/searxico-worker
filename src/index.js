@@ -31,9 +31,16 @@
 
 */
 
+let services = {};
+services['google'] = 'https://google.com/s2/favicons?domain_url={DOMAIN}&sz={ICON_SIZE}';
+services['googles2'] = 'https://s2.googleusercontent.com/s2/favicons?domain={DOMAIN}&sz={ICON_SIZE}';
+services['duckduckgo'] = 'https://icons.duckduckgo.com/ip3/{DOMAIN}.ico';
+services['yandex'] = 'http://favicon.yandex.net/favicon/{DOMAIN}';
+services['allesedv'] = 'https://f1.allesedv.com/{DOMAIN}';
+services['faviconkit'] = 'https://api.faviconkit.com/{DOMAIN}/{ICON_SIZE}';
 const version = `1.0.0`;
-const serviceApi = `https://s2.googleusercontent.com/s2/favicons?domain={DOMAIN}&sz={ICON_SIZE}`;
-const serviceApiBackup = `https://icons.duckduckgo.com/ip3/{DOMAIN}.ico`;
+const serviceApi = services['googles2'];
+const serviceApiBackup = services['duckduckgo'];
 const serviceBackup = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
 const faviconSvg = 'data:image/svg+xml,';
 const subdomain = 'get';
