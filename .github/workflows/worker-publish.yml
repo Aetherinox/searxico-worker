@@ -138,14 +138,14 @@ jobs:
                     -H "Content-Type:application/json" | jq -r '.result.bindings[0].text')
                   echo "ENV_VAR=$env" >> $GITHUB_OUTPUT
 
-                  echo '{ "query":
-                    "query GetWorkersAnalytics($accountTag: string, $datetimeStart: string, $scriptName: string) {
+                  read i_err i_req i_subreq < <(echo "{ \"query\":
+                    \"query GetWorkersAnalytics(\$accountTag: string, \$datetimeStart: string, \$scriptName: string) {
                       viewer {
-                        accounts(filter: {accountTag: $accountTag}) {
+                        accounts(filter: {accountTag: \$accountTag}) {
                           workersInvocationsAdaptive(limit: 1000, filter: {
-                            scriptName: $scriptName,
-                            datetime_geq: $datetimeStart,
-                            datetime_leq: $datetimeEnd
+                            scriptName: \$scriptName,
+                            datetime_geq: \$datetimeStart,
+                            datetime_leq: \$datetimeEnd
                           }) {
                             sum {
                               subrequests
@@ -155,16 +155,35 @@ jobs:
                           }
                         }
                       }
-                    }",
-                    "variables": {
-                      "accountTag": "${{ secrets.CF_ACCOUNT_ID }}",
-                      "datetimeStart": "${yesturday}",
-                      "datetimeEnd": "${now}",
-                      "scriptName": "searxico"
+                    }\",
+                    \"variables\": {
+                      \"accountTag\": \"${{ secrets.CF_ACCOUNT_ID }}\",
+                      \"datetimeStart\": \"$yesturday\",
+                      \"datetimeEnd\": \"$now\",
+                      \"scriptName\": \"searxico\"
                     }
-                  }' | tr -d '\n' | curl --silent \
+                  }" | curl --silent \
                   https://api.cloudflare.com/client/v4/graphql \
                   --header "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
                   --header "Accept: application/json" \
                   --header "Content-Type: application/json" \
-                  --data @- | jq -r .data.viewer.accounts[0].workersInvocationsAdaptive
+                  --data @- | jq -r '.data.viewer.accounts[0].workersInvocationsAdaptive[0] | .sum.errors, .sum.requests, .sum.subrequests' | tr \\n ' ')
+
+                  echo "ENV_ERR=$i_err" >> $GITHUB_OUTPUT
+                  echo "ENV_REQ=$i_req" >> $GITHUB_OUTPUT
+                  echo "ENV_SUBREQ=$i_subreq" >> $GITHUB_OUTPUT
+
+            # #
+            #   Job > Complete > Summary of publish
+            # #
+
+            - name: "🆗 Completed: ${{ env.NOW }}"
+              id: task_complete_summary
+              run: |
+                  echo ""
+                  echo ""
+                  echo "| File                            | Result                  |" >> $GITHUB_STEP_SUMMARY
+                  echo "| ------------------------------- | ----------------------- |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **ENV_ERR**      | ${{ env.ENV_ERR }} |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **ENV_REQ**                        | ${{ env.ENV_REQ }} |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **ENV_SUBREQ**                        | ${{ env.ENV_SUBREQ }} |" >> $GITHUB_STEP_SUMMARY
