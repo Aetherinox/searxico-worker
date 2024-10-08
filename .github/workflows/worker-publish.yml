@@ -106,7 +106,6 @@ jobs:
     job-complete:
         name: >-
           🆗 Successful Deployment
-        needs: [job-initialize, job-release]
         runs-on: ubuntu-latest
         environment:
             name: Orion
