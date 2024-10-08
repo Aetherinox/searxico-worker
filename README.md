@@ -51,10 +51,12 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
   - [Default Logo](#default-logo)
 - [Step 1: Install Dependencies](#step-1-install-dependencies)
 - [Step 2: Deploy Test Server](#step-2-deploy-test-server)
-- [Step 3: Publish Worker to Cloudflare](#step-3-publish-worker-to-cloudflare)
+- [Step 3: Customizing Worker](#step-3-customizing-worker)
+  - [Sub-Route Support](#sub-route-support)
+- [Step 4: Publish Worker to Cloudflare](#step-4-publish-worker-to-cloudflare)
   - [⚠ Windows User Exposed](#-windows-user-exposed)
   - [Deploy Worker](#deploy-worker)
-- [Step 4: Adding Your Favicon Worker to SearXNG](#step-4-adding-your-favicon-worker-to-searxng)
+- [Step 5: Adding Your Favicon Worker to SearXNG](#step-5-adding-your-favicon-worker-to-searxng)
 - [Cloudflare Loadbalancing](#cloudflare-loadbalancing)
 - [Developer Notes](#developer-notes)
   - [wrangler.toml](#wranglertoml)
@@ -404,7 +406,44 @@ Now we can proceed onto the final part of this documentation which explains on h
 
 <br />
 
-## Step 3: Publish Worker to Cloudflare
+## Step 3: Customizing Worker
+This Cloudflare worker includes a few settings you can adjust. To edit these settings, open the source file `/src/index.js` in an editor and read the sections below:
+
+<br />
+
+### Sub-Route Support
+This worker includes the ability to host your favicon worker within a sub-route of your subdomain. You can find this setting within the top of the `src/index.js` as the following settings:
+
+```js
+let bSubRoute = false;
+const subroute = 'get';
+```
+
+<br />
+
+This setting is useful for users who want to expand on this worker and add multiple routes that can be queried such as `GET`, `POST`, and treat it more like an API.
+
+If enabled, this means that you must search for favicons using the URL:
+```
+https://favicons.domain.com/get/yourdomain.com
+                             ^ Sub-route
+```
+
+<br />
+
+If you set `bSubRoute = false`, this means that you can search for favicons from domains without any type of additional route being specified. You'll notice in the example below, `/get/` is not being added to the URL:
+
+```
+https://favicons.domain.com/yourdomain.com
+```
+
+<br />
+
+---
+
+<br />
+
+## Step 4: Publish Worker to Cloudflare
 The last part of this guide explains how to publish your worker to Cloudflare.
 
 ### ⚠ Windows User Exposed
@@ -538,7 +577,7 @@ You should get a very detailed graph and hard numbers showing what your usage is
 
 <br />
 
-## Step 4: Adding Your Favicon Worker to SearXNG
+## Step 5: Adding Your Favicon Worker to SearXNG
 To use your new Favicon grabber service with SearXNG, we need to create a new file within SearXNG.
 
 ```shell

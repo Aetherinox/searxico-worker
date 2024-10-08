@@ -63,22 +63,22 @@ const uriCDN = 'https://github.com/Aetherinox/searxico-cdn';
 const uriAuthor = 'github.com/aetherinox';
 
 /*
-    Define > Subdomain Settings
+    Define > Subroute Settings
     these are useful for users who wish to add on to this worker and create additional routes such as
         => get
         => post
 
-    or for users who want to keep multiple services running on the subdomain on their site.
+    or for users who want to keep multiple services running on the subroute on their site.
 
     Conditional option
-        bSubdomain = true
+        bSubRoute = true
             you can search for an icon using domain.com/get/reddit.com
-        bSubdomain = false
-            search for an icon without a subdomain path using domain.com/reddit.com
+        bSubRoute = false
+            search for an icon without a subroute path using domain.com/reddit.com
 */
 
-let bSubdomain = false;
-const subdomain = 'get';
+let bSubRoute = false;
+const subroute = 'get';
 
 /*
     Maps
@@ -155,15 +155,15 @@ const favicoDefaultSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5
 
     @arg        : obj env
     @arg        : str host
-    @arg        : str subdomain
+    @arg        : str subroute
     @returns    : Response
 */
 
-function throwHelp(env, host, subdomain) {
+function throwHelp(env, host, subroute) {
     let out = `Searxico Favicon Grabber ${version} \n\n`;
-    if (bSubdomain) {
-        out += `@usage ...... GET ${host}/${subdomain}/domain.com \n`
-        out += `@usage ...... GET ${host}/${subdomain}/domain.com/ICON_SIZE \n`
+    if (bSubRoute) {
+        out += `@usage ...... GET ${host}/${subroute}/domain.com \n`
+        out += `@usage ...... GET ${host}/${subroute}/domain.com/ICON_SIZE \n`
     } else {
         out += `@usage ...... GET ${host}/domain.com \n`
         out += `@usage ...... GET ${host}/domain.com/ICON_SIZE \n`
@@ -440,16 +440,16 @@ export default {
         */
 
         if (bIsBaseOnly || reqURL === headersHost) {
-            return throwHelp(env, headersHost, subdomain);
+            return throwHelp(env, headersHost, subroute);
         }
 
         /*
-            check subdomain value
+            check subroute value
 
-            subdomain has everything after the base domain
-                subdomain   => get
+            subroute has everything after the base domain
+                subroute   => get
 
-            use regex '/^\/get\/?(.*)$/gim' to ensure subdomain starts with:
+            use regex '/^\/get\/?(.*)$/gim' to ensure subroute starts with:
                 - /get/
 
             example:
@@ -459,12 +459,12 @@ export default {
             help info will be displayed in the next step.
         */
 
-        const regexStartWith = new RegExp(`^\/${subdomain}\/?(.*)$`, 'igm');
+        const regexStartWith = new RegExp(`^\/${subroute}\/?(.*)$`, 'igm');
         const bStartsWith = regexStartWith.test(reqURL.pathname);
 
-        if (bSubdomain && !bStartsWith) {
+        if (bSubRoute && !bStartsWith) {
             return new Response(
-                `404 not found – could not find a valid domain. Must use ${headersHost}/${subdomain}/domain.com`,
+                `404 not found – could not find a valid domain. Must use ${headersHost}/${subroute}/domain.com`,
                 { status: 404, reason: 'domain not found' }
             );
         }
@@ -482,13 +482,13 @@ export default {
         /*
             throw help menu if searchDomain:
                 - blank
-                - contains only /subdomain
+                - contains only /subroute
         */
 
-        if (bSubdomain) {
-            searchDomain = reqURL.pathname.replace(`/${subdomain}/`, '');
-            if (!searchDomain || searchDomain === `/${subdomain}`) {
-                return throwHelp(env, headersHost, subdomain);
+        if (bSubRoute) {
+            searchDomain = reqURL.pathname.replace(`/${subroute}/`, '');
+            if (!searchDomain || searchDomain === `/${subroute}`) {
+                return throwHelp(env, headersHost, subroute);
             }
         } else {
             // clean up forward slash
@@ -502,7 +502,7 @@ export default {
                                       |────────|
             http://127.0.0.1:8787/get/searxng.org
                   ^─────────────^^──^
-                    headersHost  subdomain
+                    headersHost  subroute
                                 ^───────────────────^
                                    reqURL.pathname
             ^───────────────────────────────────^
