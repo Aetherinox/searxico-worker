@@ -142,6 +142,7 @@ jobs:
                 apiToken: ${{ secrets.CF_TOKEN }}
                 accountId: ${{ secrets.CF_ACCOUNT_ID }}
                 workingDirectory: "src"
+                environment: 'production'
                 command: deploy --minify
 
     # #
