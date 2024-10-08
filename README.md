@@ -328,7 +328,7 @@ You now have everything set up and can begin to either make edits to the source 
 Now that you finished the above section [Install Dependencies](#install-dependencies), we can now launch a development server so that you can test the worker locally. Back in your terminal, run the command:
 
 ```shell
-npx wrangler dev
+npx wrangler dev -e dev
 ```
 
 <br />
