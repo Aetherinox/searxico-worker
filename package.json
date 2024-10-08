@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "A self-hosted favicon cloudflare worker for SearXNG Search Engine.",
     "homepage": "https://github.com/Aetherinox/searxico-worker",
-    "author": "Aetherinox <118329232+Aetherinox@users.noreply.github.com>",
+    "author": "Aetherinox",
     "license": "MIT",
     "contributors": [
         {

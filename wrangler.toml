@@ -4,24 +4,88 @@
 
 name = "searxico"
 main = "src/index.js"
-workers_dev = true
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-09-23"
 
-# The rate limiting API is in open beta.
-[[unsafe.bindings]]
-name = "searxico"
-type = "ratelimit"
-namespace_id = "1001"
-simple = { limit = 30, period = 60 }
+# #
+#   The rate limiting API is in open beta.
+#   https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+# #
 
-# env variables
-[vars]
-THROTTLE_DELAY_MS = 0
-THROTTLE_AGGRESSIVE = false
-THROTTLE_AGGRESSIVE_PUNISH_MS = 5000
-THROTTLE_DAILY_ENABLED = false
-THROTTLE_DAILY_LIMIT = 2000
+[[unsafe.bindings]]
+    name = "searxico"
+    type = "ratelimit"
+    namespace_id = "1001"
+    simple = { limit = 30, period = 60 }
+
+# #
+#   Environment - Production
+#   For production environment, use '-e production'
+# #
+
+[env.production]
+    name = "searxico"
+    workers_dev = false
+
+    # #
+    #   Environment - Production - Vars
+    # #
+
+    [env.production.vars]
+        ENVIRONMENT = "production"
+        THROTTLE_DELAY_MS = 500
+        THROTTLE_AGGRESSIVE = false
+        THROTTLE_AGGRESSIVE_PUNISH_MS = 5000
+        THROTTLE_DAILY_ENABLED = false
+        THROTTLE_DAILY_LIMIT = 2000
+
+    # #
+    #   The rate limiting API is in open beta.
+    #   https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+    # #
+
+    [[env.production.unsafe.bindings]]
+        name = "searxico"
+        type = "ratelimit"
+        namespace_id = "1001"
+        simple = { limit = 30, period = 60 }
+
+# #
+#   Environment - Development
+#   For dev environment, use '-e dev'
+# #
+
+[env.dev]
+    name = "searxico"
+    workers_dev = true
+
+    # #
+    #   Environment - Development - Vars
+    # #
+
+    [env.dev.vars]
+        ENVIRONMENT = "dev"
+        THROTTLE_DELAY_MS = 500
+        THROTTLE_AGGRESSIVE = true
+        THROTTLE_AGGRESSIVE_PUNISH_MS = 5000
+        THROTTLE_DAILY_ENABLED = true
+        THROTTLE_DAILY_LIMIT = 2000
+
+    # #
+    #   The rate limiting API is in open beta.
+    #   https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+    # #
+
+    [[env.dev.unsafe.bindings]]
+        name = "searxico"
+        type = "ratelimit"
+        namespace_id = "1001"
+        simple = { limit = 30, period = 60 }
+
+# #
+#   Logs
+#   https://developers.cloudflare.com/workers/observability/logs/
+# #
 
 [observability]
-enabled = true
+    enabled = true
