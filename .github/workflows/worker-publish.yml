@@ -110,6 +110,8 @@ jobs:
         permissions:
             contents: write
             packages: write
+        environment:
+            name: Orion
         steps:
 
             # #
@@ -163,6 +165,8 @@ jobs:
         permissions:
             contents: read
             packages: write
+        environment:
+            name: Orion
         steps:
 
             # #
@@ -243,6 +247,8 @@ jobs:
         permissions:
             contents: write
             packages: write
+        environment:
+            name: Orion
         steps:
 
             # #
@@ -611,6 +617,8 @@ jobs:
             GUID: ${{ needs.job-release.outputs.guid }}
             UUID: ${{ needs.job-release.outputs.uuid }}
         runs-on: ubuntu-latest
+        environment:
+            name: Orion
         steps:
 
             # #
