@@ -83,6 +83,9 @@ With the introduction of favicons into the SearXNG self-hosted search engine, th
 
 ### Usage
 You can search a website for a favicon using the officially hosted worker, or by hosting your own:
+- https://searxico.aetherinox.workers.dev/google.com/64
+
+If you have enabled the `subroute` setting in `src/index.js`, then you will need to use the URL:
 - https://searxico.aetherinox.workers.dev/get/google.com/64
 
 <br />
@@ -372,8 +375,8 @@ You should now see the favicon homepage:
 ```
 Searxico Favicon Grabber 1.0.0 
 
-@usage ...... GET localhost:8787/get/domain.com 
-              GET localhost:8787/get/domain.com/ICON_SIZE 
+@usage ...... GET localhost:8787/domain.com 
+              GET localhost:8787/domain.com/ICON_SIZE 
 @repo: ...... https://github.com/Aetherinox/searxico-worker 
 @cdn: ....... https://github.com/Aetherinox/searxico-cdn 
 @author: ...  github.com/aetherinox 
@@ -383,7 +386,7 @@ Searxico Favicon Grabber 1.0.0
 
 If you want to test out getting an icon, pick a domain and add it to the end of the URL:
 ```
-http://localhost:8787/get/searxng.org
+http://localhost:8787/searxng.org
 ```
 
 <br />
@@ -656,7 +659,7 @@ def _req_args(**kwargs):
 def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
     """Favicon Resolver from searxico"""
     data, mime = (None, None)
-    url = f"https://searxico.aetherinox.workers.dev/get/{domain}/32"
+    url = f"https://searxico.aetherinox.workers.dev/{domain}/32"
     logger.debug("fetch favicon from: %s", url)
 
     response = network.get(url, **_req_args(timeout=timeout))
@@ -670,7 +673,7 @@ def searxico(domain: str, timeout: int) -> tuple[None | bytes, None | str]:
 <br />
 
 In the code above, change the URL to your custom domain, or your Cloudflare worker:
-- `url = f"https://searxico.aetherinox.workers.dev/get/{domain}/32"`
+- `url = f"https://searxico.aetherinox.workers.dev/{domain}/32"`
 
 <br />
 
