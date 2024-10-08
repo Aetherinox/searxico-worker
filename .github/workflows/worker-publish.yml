@@ -641,22 +641,31 @@ jobs:
         steps:
 
             # #
-            #   artifacts > download
+            #   Job > Complete > Download Artifacts
             # #
 
             - name: "📁 Download › Saved Artifacts"
+              id: task_complete_artifacts_download
               uses: actions/download-artifact@v4
 
             # #
-            #   CLOUDFLARE > CHECK PROJECT
-            #
+            #   Job > Complete > Get publish timestamp
+            # #
+
+            - name: "🕛 Get Timestamp"
+              id: task_complete_timestamp_get
+              run: |
+                echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+
+            # #
+            #   Job > Complete > Cloudflare > Check Project
             #   this step checks to see if your project already exists on cloudflare
             #   today        date --utc +%FT%TZ
             #   yesterday    date --utc -d '-1 day' '+%FT%TZ'
             # #
 
             - name: "☁️ CF › Check Project"
-              id: task_cloudflare_project_check
+              id: task_complete_project_check
               shell: bash
               run: |
                   yesturday=$(date --utc -d '-1 day' '+%FT%TZ')
@@ -666,6 +675,11 @@ jobs:
                     -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
                     -H "Content-Type:application/json" | jq -r '.result.bindings[0].text')
                   echo "WORKER_ENV=$worker_env" >> $GITHUB_ENV
+
+                  worker_compatdate=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/searxico/settings/" \
+                    -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
+                    -H "Content-Type:application/json" | jq -r '.result.compatibility_date')
+                  echo "WORKER_COMPATDATE=$worker_compatdate" >> $GITHUB_ENV
 
                   API_JSON=$(echo "{ \"query\":
                     \"query GetWorkersAnalytics(\$accountTag: string, \$datetimeStart: string, \$scriptName: string) {
@@ -715,9 +729,12 @@ jobs:
               run: |
                   echo ""
                   echo ""
-                  echo "| File                            | Result                  |" >> $GITHUB_STEP_SUMMARY
-                  echo "| ------------------------------- | ----------------------- |" >> $GITHUB_STEP_SUMMARY
-                  echo "| **Worker State**                | ${{ env.WORKER_ENV }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| **Worker Errors**               | ${{ env.ENV_API_ERR }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| **Worker Requests**             | ${{ env.ENV_API_REQ }} |" >> $GITHUB_STEP_SUMMARY
-                  echo "| **Worker Subrequests**          | ${{ env.ENV_API_SUBREQ }} |" >> $GITHUB_STEP_SUMMARY
+                  echo "| File                            | Result                        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| ------------------------------- | -----------------------       |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Project**                     | ${{ env.PLUGIN_NAME }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Deploy Time**                 | ${{ env.NOW }}                |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Compatibility Date**   | ${{ env.WORKER_COMPATDATE }}  |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker State**                | ${{ env.WORKER_ENV }}         |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Errors**               | ${{ env.ENV_API_ERR }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Requests**             | ${{ env.ENV_API_REQ }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Subrequests**          | ${{ env.ENV_API_SUBREQ }}     |" >> $GITHUB_STEP_SUMMARY
