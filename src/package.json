@@ -1,9 +1,11 @@
 {
     "name": "@aetherinox/searxico-worker",
-    "version": "1.0.0",
-    "description": "Get the favicon of a URL",
+    "version": "1.1.0",
+    "description": "A self-hosted favicon cloudflare worker for SearXNG Search Engine.",
     "homepage": "https://github.com/aetherinox/searxico-worker",
-    "author": "Aetherinox <adminservx@proton.me>",
+    "homepage_cdn": "https://github.com/aetherinox/searxico-cdn",
+    "author": "Aetherinox",
+    "license": "MIT",
     "contributors": [
         {
             "name": "Aetherinox",
@@ -26,14 +28,17 @@
     "bugs": {
         "url": "https://github.com/Aetherinox/searxico-worker/issues"
     },
-    "license": "MIT",
     "keywords": [
         "aetherinox",
-        "searxng",
         "searxico",
+        "searxng",
+        "searx",
         "favicon",
         "cloudflare",
-        "worker"
+        "cloudflare-worker",
+        "worker",
+        "wrangler",
+        "self-hosting"
     ],
     "main": "index.js"
 }

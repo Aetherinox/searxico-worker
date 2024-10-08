@@ -1,8 +1,9 @@
 {
     "name": "@aetherinox/searxico-worker-wrangler",
-    "version": "1.1.0",
+    "version": "1.0.0",
     "description": "A self-hosted favicon cloudflare worker for SearXNG Search Engine.",
     "homepage": "https://github.com/Aetherinox/searxico-worker",
+    "homepage_cdn": "https://github.com/aetherinox/searxico-cdn",
     "author": "Aetherinox",
     "license": "MIT",
     "contributors": [
@@ -35,11 +36,16 @@
         }
     ],
     "keywords": [
+        "aetherinox",
         "searxico",
         "searxng",
+        "searx",
         "favicon",
         "cloudflare",
-        "worker"
+        "cloudflare-worker",
+        "worker",
+        "wrangler",
+        "self-hosting"
     ],
     "scripts": {
         "deploy": "wrangler deploy",
