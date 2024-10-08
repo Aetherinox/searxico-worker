@@ -482,7 +482,7 @@ wrangler deploy --minify
 Go back to your Terminal, and execute the command:
 
 ```shell
-npx wrangler deploy
+npx wrangler deploy -e production
 ```
 
 <br />
@@ -808,7 +808,7 @@ npm install wrangler@latest
 Launches your local wrangler / cloudflare dev project in a test environment.
 
 ```shell ignore
-wrangler dev
+npx wrangler dev -e dev
 ```
 
 <br /> <br />
@@ -851,7 +851,7 @@ wrangler deploy [<SCRIPT>] [OPTIONS]
 ```
 
 ```shell ignore
-wrangler deploy --minify
+wrangler deploy --minify -e production
 ```
 
 > [!NOTE] OPTIONS
