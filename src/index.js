@@ -31,6 +31,10 @@
 
 */
 
+/*
+    Define > Services
+*/
+
 let services = {};
 services['google'] = 'https://google.com/s2/favicons?domain_url={DOMAIN}&sz={ICON_SIZE}';
 services['googles2'] = 'https://s2.googleusercontent.com/s2/favicons?domain={DOMAIN}&sz={ICON_SIZE}';
@@ -38,13 +42,43 @@ services['duckduckgo'] = 'https://icons.duckduckgo.com/ip3/{DOMAIN}.ico';
 services['yandex'] = 'http://favicon.yandex.net/favicon/{DOMAIN}';
 services['allesedv'] = 'https://f1.allesedv.com/{DOMAIN}';
 services['faviconkit'] = 'https://api.faviconkit.com/{DOMAIN}/{ICON_SIZE}';
+
+/*
+    Define > General
+*/
+
 const version = `1.0.0`;
 const serviceApi = services['googles2'];
 const serviceApiBackup = services['duckduckgo'];
-const serviceBackup = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
+const serviceCdn = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
 const faviconSvg = 'data:image/svg+xml,';
-const subdomain = 'get';
 const workerId = 'searxico-worker';
+
+/*
+    Define > Worker URLs
+*/
+
+const uriRepo = 'https://github.com/Aetherinox/searxico-worker';
+const uriCDN = 'https://github.com/Aetherinox/searxico-cdn';
+const uriAuthor = 'github.com/aetherinox';
+
+/*
+    Define > Subdomain Settings
+    these are useful for users who wish to add on to this worker and create additional routes such as
+        => get
+        => post
+
+    or for users who want to keep multiple services running on the subdomain on their site.
+
+    Conditional option
+        bSubdomain = true
+            you can search for an icon using domain.com/get/reddit.com
+        bSubdomain = false
+            search for an icon without a subdomain path using domain.com/reddit.com
+*/
+
+let bSubdomain = false;
+const subdomain = 'get';
 
 /*
     Maps
@@ -126,14 +160,20 @@ const favicoDefaultSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5
 */
 
 function throwHelp(env, host, subdomain) {
-    return new Response(
-        `Searxico Favicon Grabber ${version} \n\n` +
-            `@usage ...... GET ${host}/${subdomain}/domain.com \n` +
-            `              GET ${host}/${subdomain}/domain.com/ICON_SIZE \n` +
-            '@repo: ...... https://github.com/Aetherinox/searxico-worker \n' +
-            '@cdn: ....... https://github.com/Aetherinox/searxico-cdn \n' +
-            '@author: ...  github.com/aetherinox \n'
-    );
+    let out = `Searxico Favicon Grabber ${version} \n\n`;
+    if (bSubdomain) {
+        out += `@usage ...... GET ${host}/${subdomain}/domain.com \n`
+        out += `@usage ...... GET ${host}/${subdomain}/domain.com/ICON_SIZE \n`
+    } else {
+        out += `@usage ...... GET ${host}/domain.com \n`
+        out += `@usage ...... GET ${host}/domain.com/ICON_SIZE \n`
+    }
+
+    out += `@repo: ...... ${uriRepo} \n`
+    out += `@cdn: ....... ${uriCDN} \n`
+    out += `@author: ...  ${uriAuthor} \n`
+
+    return new Response(out);
 }
 
 /*
@@ -188,6 +228,17 @@ function handleIconName(url) {
 
     return [baseName, iconName];
 }
+
+/*
+    Service > Get Random
+
+    @usage          serviceRand(services)
+*/
+
+const serviceRand = function (obj) {
+  const keys = Object.keys(obj);
+  return obj[keys[Math.floor(keys.length * Math.random())]];
+};
 
 /*
     Method > Throttle
@@ -411,7 +462,7 @@ export default {
         const regexStartWith = new RegExp(`^\/${subdomain}\/?(.*)$`, 'igm');
         const bStartsWith = regexStartWith.test(reqURL.pathname);
 
-        if (!bStartsWith) {
+        if (bSubdomain && !bStartsWith) {
             return new Response(
                 `404 not found – could not find a valid domain. Must use ${headersHost}/${subdomain}/domain.com`,
                 { status: 404, reason: 'domain not found' }
@@ -426,7 +477,7 @@ export default {
             https://x.x.0.1:8787/get/       returns empty string
         */
 
-        let searchDomain = reqURL.pathname.replace(`/${subdomain}/`, '');
+        let searchDomain = reqURL.pathname;
 
         /*
             throw help menu if searchDomain:
@@ -434,8 +485,14 @@ export default {
                 - contains only /subdomain
         */
 
-        if (!searchDomain || searchDomain === `/${subdomain}`) {
-            return throwHelp(env, headersHost, subdomain);
+        if (bSubdomain) {
+            searchDomain = reqURL.pathname.replace(`/${subdomain}/`, '');
+            if (!searchDomain || searchDomain === `/${subdomain}`) {
+                return throwHelp(env, headersHost, subdomain);
+            }
+        } else {
+            // clean up forward slash
+            searchDomain = reqURL.pathname.replace(`/`, '');
         }
 
         /*
@@ -597,7 +654,7 @@ export default {
         const [base, iconName] = handleIconName(targetURL.origin);
         const baseFolder = base.charAt(0);
         const iconPath = `${baseFolder}/${iconName}`;
-        const iconUrl = `${serviceBackup}/${baseFolder}/${iconName}.ico`;
+        const iconUrl = `${serviceCdn}/${baseFolder}/${iconName}.ico`;
 
         /*
             Icon Overrides > Favicon CDN Repo > Primary
