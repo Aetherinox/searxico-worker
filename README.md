@@ -41,6 +41,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 <br />
 
 - [About](#about)
+  - [Is This Strictly for SearXNG?](#is-this-strictly-for-searxng)
   - [Usage](#usage)
 - [How It Works](#how-it-works)
   - [Self-hosted CDN Repository](#self-hosted-cdn-repository)
@@ -78,6 +79,11 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 ## About
 With the introduction of favicons into the SearXNG self-hosted search engine, this repository allows you to run your own favicon grabber service that can be used in combination with existing favicon services, or as its own stand-alone worker.
+
+<br />
+
+### Is This Strictly for SearXNG?
+No. This worker was made for SearXNG, however, the favicon worker can be used for any service that makes use of a favicon grabber. 
 
 <br />
 
