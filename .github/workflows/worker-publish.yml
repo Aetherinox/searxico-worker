@@ -172,86 +172,86 @@ jobs:
             name: Orion
         steps:
 
-          # #
-          #   Cloudflare Worker > Checkout
-          # #
+            # #
+            #   Cloudflare Worker > Checkout
+            # #
 
-          - name: "☑️ Checkout"
-            id: task_cloudflare_checkout
-            uses: actions/checkout@v4
-            with:
-              fetch-depth: 0
+            - name: "☑️ Checkout"
+              id: task_cloudflare_checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
 
-          # #
-          #   Cloudflare Worker > Setup Node
-          # #
+            # #
+            #   Cloudflare Worker > Setup Node
+            # #
 
-          - name: "⚙️ Setup › Node"
-            id: task_cloudflare_node_setup
-            uses: actions/setup-node@v4
-            with:
-              node-version: '20.x'
-              registry-url: https://npm.pkg.github.com/
-              scope: '@aetherinox'
+            - name: "⚙️ Setup › Node"
+              id: task_cloudflare_node_setup
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20.x'
+                registry-url: https://npm.pkg.github.com/
+                scope: '@aetherinox'
 
-          # #
-          #   Cloudflare Worker > Install Node
-          # #
+            # #
+            #   Cloudflare Worker > Install Node
+            # #
 
-          - name: "📦 NPM › Install"
-            id: task_cloudflare_npm_install
-            run: |
-              npm install
-            env:
-              NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
+            - name: "📦 NPM › Install"
+              id: task_cloudflare_npm_install
+              run: |
+                npm install
+              env:
+                NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
 
-          # #
-          #   Cloudflare Worker > Run Prettier
-          # #
+            # #
+            #   Cloudflare Worker > Run Prettier
+            # #
 
-          - name: "🪪 NPM › Pretty"
-            id: task_cloudflare_npm_prettylint
-            run: |
-              npm run pretty
+            - name: "🪪 NPM › Pretty"
+              id: task_cloudflare_npm_prettylint
+              run: |
+                npm run pretty
 
-          # #
-          #   Cloudflare Worker > Debug > Print pacakge Version
-          # #
+            # #
+            #   Cloudflare Worker > Debug > Print pacakge Version
+            # #
 
-          - name: "☁️ Cloudflare › Version"
-            id: task_cloudflare_version
-            run: |
-              echo "VERSION: ${{ env.PACKAGE_VERSION }}"
+            - name: "☁️ Cloudflare › Version"
+              id: task_cloudflare_version
+              run: |
+                echo "VERSION: ${{ env.PACKAGE_VERSION }}"
 
-          # #
-          #   Cloudflare Worker > Deploy
-          #
-          #   ensure `environment` is set to production. options available:
-          #       - production
-          #       - dev
-          # #
+            # #
+            #   Cloudflare Worker > Deploy
+            #
+            #   ensure `environment` is set to production. options available:
+            #       - production
+            #       - dev
+            # #
 
-          - name: "☁️ Cloudflare › Deploy"
-            id: task_cloudflare_deploy
-            uses: cloudflare/wrangler-action@v3
-            with:
-              apiToken: ${{ secrets.CF_TOKEN }}
-              accountId: ${{ secrets.CF_ACCOUNT_ID }}
-              workingDirectory: "src"
-              environment: 'production'
-              command: deploy --minify
+            - name: "☁️ Cloudflare › Deploy"
+              id: task_cloudflare_deploy
+              uses: cloudflare/wrangler-action@v3
+              with:
+                apiToken: ${{ secrets.CF_TOKEN }}
+                accountId: ${{ secrets.CF_ACCOUNT_ID }}
+                workingDirectory: "src"
+                environment: 'production'
+                command: deploy --minify
 
-          # #
-          #   Cloudflare Worker > Deployment › Output
-          #
-          #   returns the deployment url
-          # #
+            # #
+            #   Cloudflare Worker > Deployment › Output
+            #
+            #   returns the deployment url
+            # #
 
-          - name: "☁️ Cloudflare › Deployment Output"
-            id: task_cloudflare_deploy_output
-            env:
-                DEPLOYMENT_URL: ${{ steps.task_cloudflare_deploy.outputs.deployment-url }}
-            run: echo $DEPLOYMENT_URL
+            - name: "☁️ Cloudflare › Deployment Output"
+              id: task_cloudflare_deploy_output
+              env:
+                  DEPLOYMENT_URL: ${{ steps.task_cloudflare_deploy.outputs.deployment-url }}
+              run: echo $DEPLOYMENT_URL
 
     # #
     #   Job > Release > Github
@@ -297,10 +297,12 @@ jobs:
             #   Release > Install package via NPM
             # #
 
-            - name: "🪪 Install Dependencies"
+            - name: "🪪 NPM › Install"
               id: task_release_npm_install
               run: |
                   npm install
+              env:
+                NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
 
             # #
             #   Release > Print / Lint
