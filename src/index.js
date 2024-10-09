@@ -53,6 +53,7 @@ services['faviconkit'] = 'https://api.faviconkit.com/{DOMAIN}/{ICON_SIZE}';
     Define > General
 */
 
+const bServiceApiEnabled = true;
 const serviceApi = services['googles2'];
 const serviceApiBackup = services['duckduckgo'];
 const serviceCdn = 'https://raw.githubusercontent.com/Aetherinox/searxico-cdn/main';
@@ -800,9 +801,6 @@ export default {
         */
 
         if (iconsOverrideSvg[iconPath]) {
-
-            console.log(iconPath)
-            console.log(iconsOverrideSvg)
             if ( env.ENVIRONMENT === "dev" ) {
                 console.log(
                     `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[svg-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
@@ -863,17 +861,21 @@ export default {
             replacements.hasOwnProperty(phNoDelims) ? replacements[phNoDelims] : phWithDelims
         );
 
-        let serviceQueryUrl = `${_serviceQueryUrl}`;
+        let serviceQueryUrl = `${_serviceQueryUrl}`;                // returns `https://s2.googleusercontent.com/s2/favicons?domain=microsoft.com&sz=32`
         let serviceResultIcon = await fetch(serviceQueryUrl);
 
-        const ct = serviceResultIcon.headers.get('content-type');
+        /*
+            api > primary
+        */
+
+        const ct = serviceResultIcon.headers.get('content-type');   // returns `image/png`
 
         if (ct.includes('application') || ct.includes('text')) {
             serviceResultIcon = await fetch(`${serviceQueryUrl}`);
         }
 
         /*
-            Backup service api url
+            api > backup
 
             this will activate if all previous steps have failed to find a favicon.
         */
@@ -889,6 +891,16 @@ export default {
 
             serviceQueryUrl = `${_serviceQueryUrlBackup}`;
             serviceResultIcon = await fetch(serviceQueryUrl);
+
+            if ( env.ENVIRONMENT === "dev" ) {
+                console.log(
+                    `\x1b[32m[${workerId}]\x1b[0m FIND \x1b[33m[api-backup]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                );
+            } else {
+                console.log(
+                    `[${workerId}] FIND [api-backup] ${serviceQueryUrl} | query by ${clientIp}`
+                );
+            }
         }
 
         /*
@@ -1010,7 +1022,29 @@ export default {
                     }
 
                     return RespIcon;
+                } else if ( iconExt === "png") {
+                    const fetchIcoPng = await fetch(favicon);
+                    if (fetchIcoPng.status === 200) {
+                        let resp = new Response(fetchIcoPng.body, {
+                            headers: {
+                                ...DEFAULT_CORS_HEADERS
+                            }
+                        });
+
+                        if ( env.ENVIRONMENT === "dev" ) {
+                            console.log(
+                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-png]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                            );
+                        } else {
+                            console.log(
+                                `[${workerId}] FOUND [html-scanner-png] ${favicon} | query by ${clientIp}`
+                            );
+                        }
+
+                        return resp;
+                    }
                 }
+
             }
         }
 
