@@ -981,11 +981,11 @@ export default {
 
                         if ( env.ENVIRONMENT === "dev" ) {
                             console.log(
-                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-ico]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scrape-ico]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
                             );
                         } else {
                             console.log(
-                                `[${workerId}] FOUND [html-scanner-ico] ${favicon} | query by ${clientIp}`
+                                `[${workerId}] FOUND [html-scrape-ico] ${favicon} | query by ${clientIp}`
                             );
                         }
 
@@ -1013,11 +1013,11 @@ export default {
 
                     if ( env.ENVIRONMENT === "dev" ) {
                         console.log(
-                            `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-svg]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                            `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scrape-svg]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
                         );
                     } else {
                         console.log(
-                            `[${workerId}] FOUND [html-scanner-svg] ${favicon} | query by ${clientIp}`
+                            `[${workerId}] FOUND [html-scrape-svg] ${favicon} | query by ${clientIp}`
                         );
                     }
 
@@ -1033,11 +1033,11 @@ export default {
 
                         if ( env.ENVIRONMENT === "dev" ) {
                             console.log(
-                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-png]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scrape-png]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
                             );
                         } else {
                             console.log(
-                                `[${workerId}] FOUND [html-scanner-png] ${favicon} | query by ${clientIp}`
+                                `[${workerId}] FOUND [html-scrape-png] ${favicon} | query by ${clientIp}`
                             );
                         }
 
@@ -1061,11 +1061,11 @@ export default {
 
                     if ( env.ENVIRONMENT === "dev" ) {
                         console.log(
-                            `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-favicon]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                            `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scrape-favicon]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
                         );
                     } else {
                         console.log(
-                            `[${workerId}] FOUND [html-scanner-favicon] ${favicon} | query by ${clientIp}`
+                            `[${workerId}] FOUND [html-scrape-favicon] ${favicon} | query by ${clientIp}`
                         );
                     }
 
