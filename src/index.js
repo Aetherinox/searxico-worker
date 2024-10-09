@@ -35,7 +35,7 @@
     Imports
 */
 
-import { version, author, homepage } from "../package.json";
+import { version, author, homepage } from "./package.json";
 
 /*
     Define > Services

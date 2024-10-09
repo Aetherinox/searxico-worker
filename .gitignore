@@ -17,6 +17,12 @@ lerna-debug.log*
 .src
 
 # #
+#   dist
+# #
+
+.dist
+
+# #
 #   Private config files
 # #
 
