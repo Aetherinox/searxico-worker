@@ -98,9 +98,9 @@ jobs:
               id: task_cloudflare_node_setup
               uses: actions/setup-node@v4
               with:
-                node-version: '20.x'
-                registry-url: https://npm.pkg.github.com/
-                scope: '@aetherinox'
+                  node-version: '20.x'
+                  registry-url: https://npm.pkg.github.com/
+                  scope: '@aetherinox'
 
             # #
             #   [ Daily Reset ] Node - Install
@@ -109,9 +109,9 @@ jobs:
             - name: "📦 NPM › Install"
               id: task_cloudflare_npm_install
               run: |
-                npm install
+                  npm install
               env:
-                NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
+                  NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
 
             # #
             #   [ Daily Reset ] Run Pretty + Linter
@@ -120,7 +120,7 @@ jobs:
             - name: "🪪 NPM › Pretty"
               id: task_cloudflare_npm_prettylint
               run: |
-                npm run pretty
+                  npm run pretty
 
             # #
             #   [ Daily Reset ] Print Version
@@ -129,7 +129,7 @@ jobs:
             - name: "☁️ Cloudflare › Version"
               id: task_cloudflare_version
               run: |
-                echo "VERSION: ${{ env.PACKAGE_VERSION }}"
+                  echo "VERSION: ${{ env.PACKAGE_VERSION }}"
 
             # #
             #   [ Daily Reset ] Cloudflare Wrangler Actions - Deploy
@@ -139,11 +139,11 @@ jobs:
               id: task_cloudflare_deploy
               uses: cloudflare/wrangler-action@v3
               with:
-                apiToken: ${{ secrets.CF_TOKEN }}
-                accountId: ${{ secrets.CF_ACCOUNT_ID }}
-                workingDirectory: "src"
-                environment: 'production'
-                command: deploy --minify
+                  apiToken: ${{ secrets.CF_TOKEN }}
+                  accountId: ${{ secrets.CF_ACCOUNT_ID }}
+                  workingDirectory: "src"
+                  environment: 'production'
+                  command: deploy --minify
 
     # #
     #   [ Job ] - Complete
