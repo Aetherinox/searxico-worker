@@ -932,37 +932,85 @@ export default {
 
         if (response) {
             let newResponse = new HTMLRewriter()
-                .on('link[rel*="icon"]', {
-                    async element(element) {
-                        if (element.getAttribute('rel') === 'mask-icon' || favicon) return;
-                        favicon = element.getAttribute('href');
-                        if (favicon.startsWith('/')) {
-                            const prefix = favicon.startsWith('//') ? 'https:' : targetURL.origin;
-                            favicon = prefix + favicon;
-                        } else if (!favicon.startsWith('http')) {
-                            favicon = targetURL.origin + '/' + favicon;
-                        }
+            .on('link[rel*="icon"]', {
+                element(element) {
+                    favicon = element.getAttribute('href');
+                    if (favicon.startsWith('/')) {
+                        const prefix = favicon.startsWith('//') ? 'https:' : targetURL.origin
+                        favicon = prefix + favicon
+                    } else if (!favicon.startsWith('http')) {
+                        favicon = targetURL.origin + '/' + favicon
                     }
-                })
-                .transform(response);
+                }
+            });
 
-            await newResponse.text();
+            // must be called before getting favicon variable
+            const _text = await newResponse.transform(response).text();
 
+            // favicon returns ico and svg url
             if (favicon) {
-                let fetchIcon = await fetch(favicon);
 
-                const svgHtml = await fetchIcon.text();
-                const svgHtmlResize = svgHtml.replace('<svg', "<svg width='64' height='64'");
+                let iconPop = favicon.split('.').pop(); // everything after last period (plus period) -- ex:  .ico
+                let iconExt = iconPop.substring(0,3); // filter file extension
 
-                const RespIcon = new Response(svgHtmlResize, fetchIcon, {
-                    headers: {
-                        'Content-Type': 'image/svg+xml',
-                        'Accept-Encoding': 'gzip, svgz',
-                        ...DEFAULT_CORS_HEADERS
+                /*
+                    HTML Scanner - ICO
+                    test with http://127.0.0.1:8787/microsoft.com
+                */
+
+                if ( iconExt === "ico") {
+                    const fetchIcoPng = await fetch(favicon);
+                    if (fetchIcoPng.status === 200) {
+                        let resp = new Response(fetchIcoPng.body, {
+                            headers: {
+                                ...DEFAULT_CORS_HEADERS
+                            }
+                        });
+
+                        if ( env.ENVIRONMENT === "dev" ) {
+                            console.log(
+                                `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-ico]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                            );
+                        } else {
+                            console.log(
+                                `[${workerId}] FOUND [html-scanner-ico] ${favicon} | query by ${clientIp}`
+                            );
+                        }
+
+                        return resp;
                     }
-                });
 
-                return RespIcon;
+                /*
+                    HTML Scanner - svg
+                    test with http://127.0.0.1:8787/github.com
+                */
+
+                } else if ( iconExt === "svg") {
+                    const fetchIcon = await fetch(favicon);
+                    let svgHtml = await fetchIcon.text();
+                    svgHtml = svgHtml.replace(/(width\s*=\s*["'])[0-9]+(["'])/ig, "width=\"" + iconSize + "\"");
+                    svgHtml = svgHtml.replace(/(height\s*=\s*["'])[0-9]+(["'])/ig, "height=\"" + iconSize + "\"");
+
+                    const RespIcon = new Response(svgHtml, {
+                        headers: {
+                            'Content-Type': 'image/svg+xml',
+                            'Accept-Encoding': 'gzip, svgz',
+                            ...DEFAULT_CORS_HEADERS
+                        }
+                    });
+
+                    if ( env.ENVIRONMENT === "dev" ) {
+                        console.log(
+                            `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[html-scanner-svg]\x1b[0m \x1b[33m${favicon}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                        );
+                    } else {
+                        console.log(
+                            `[${workerId}] FOUND [html-scanner-svg] ${favicon} | query by ${clientIp}`
+                        );
+                    }
+
+                    return RespIcon;
+                }
             }
         }
 
