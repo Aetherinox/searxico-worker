@@ -301,7 +301,7 @@ npm install
 
 <br />
 
-If you get any **deprecation** warnings, ignore them. A few packages need to be migrated to their new fork packages. Next, confirm that Wrangler is installed by running the command:
+Next, confirm that Wrangler is installed by running the command:
 
 ```shell
 npx wrangler -v
