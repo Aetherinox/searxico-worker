@@ -225,6 +225,11 @@ const template = ( console, domain ) =>`
             height: 100%;
         }
 
+        figure {
+            background-image: url("https://raw.githubusercontent.com/Aetherinox/searxico-worker/4433dfde95a9b0680e42765b209a65a10cba28db/src/assets/img/1.jpg");
+            background-size: cover;
+        }
+
         .Surface {
             display: flex;
         }
@@ -370,7 +375,7 @@ const template = ( console, domain ) =>`
             font-family: var(--monospace-font-family);
             padding: 1.5em;
             font-size: 0.9em;
-            background: #20202b;
+            background: rgba(29, 29, 37, 0.60);
             color: #fff;
             cursor: text;
             overflow: auto;
