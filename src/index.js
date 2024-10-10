@@ -862,7 +862,7 @@ export default {
         */
 
         let iconSize = 32;
-        if (iconArgs[1] !== undefined && !isNaN(iconArgs[1])) {
+        if (iconArgs[1]) {
             iconSize = iconArgs[1];
         }
 
