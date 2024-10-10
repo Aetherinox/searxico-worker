@@ -2,15 +2,12 @@
     Searxico Favicon Cloudflare Worker > v1
 
     @authors    : Aetherinox, github.com/aetherinox
-    @app        : SearXNG
     @repo       : https://github.com/Aetherinox/searxico-worker
     @repo-cdn   : https://github.com/Aetherinox/searxico-cdn
 
     @ABOUT      : This cloudflare worker gives you the ability to host your
-                  own favicon grabber.
-
-    @TODO       : script needs to be refactored to clean up a few things.
-                  add ability to specify custom favicon service.
+                  own favicon grabber. includes support for SearXNG, as well
+                  as a stand-alone service.
 
     @USAGE      : https://sub.domain.com/get/<DOMAIN.COM>/<ICON_SIZE>
                   https://searxico.aetherinox.workers.dev/get/
