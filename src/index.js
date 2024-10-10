@@ -36,6 +36,7 @@ import template from './html.js'
 import types from './types.js'
 import clr from './clr.js'
 import { version, author, homepage } from "./package.json";
+import { jsonResp, jsonErr } from './json.js'
 
 /*
     Define > Services
@@ -72,17 +73,17 @@ const uriCDN = 'https://github.com/Aetherinox/searxico-cdn';
         => get
         => post
 
-    or for users who want to keep multiple services running on the subroute on their site.
+    or for users who want to keep multiple services running on the route on their site.
 
     Conditional option
         bSubRoute = true
             you can search for an icon using domain.com/get/reddit.com
         bSubRoute = false
-            search for an icon without a subroute path using domain.com/reddit.com
+            search for an icon without a route path using domain.com/reddit.com
 */
 
 let bSubRoute = false;
-const subroute = 'get';
+const route = 'get';
 
 /*
     Maps
@@ -155,31 +156,52 @@ const favicoDefaultSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5
 </svg>`;
 
 /*
+    Logger
+*/
+
+const Logger = function(name) {
+	this.name = name;
+};
+
+Logger.dev = function(env, id, a) {
+    if (env.ENVIRONMENT === "dev")
+	    console.log(`${clr.green}[${workerId}]${clr.reset} ${id} ${a}`);
+    else
+        console.log(`${clr.green}[${workerId}]${clr.reset} ${id} ${a}`);
+}
+
+Logger.var = function(env, id, a ) {
+    if (env.ENVIRONMENT === "dev")
+        console.log(`${clr.green}[${workerId}]${clr.reset} ${clr.lgrey}[var:${clr.yellow}${id}${clr.lgrey}]${clr.reset} ${a}${clr.reset}`)
+    else
+        console.log(`[${workerId}] [var:${id}] ${a}`)
+}
+
+/*
     throw general help message
 
     @arg        : obj env
     @arg        : str host
-    @arg        : str subroute
+    @arg        : str route
     @returns    : Response
 */
 
-function throwHelp(env, host, subroute) {
+function throwHelp(env, hostBase) {
     let out = `Searxico Favicon Grabber v${version} \n\n`;
-    const domain = bSubRoute ? `${host}/${subroute}` : `${host}`
 
     if ( env.ENVIRONMENT === "dev" ) {
         console.log("Environment Dump");
         console.log(env)
     }
 
-    out += `@usage ...... GET ${domain}/domain.com \n`
-    out += `              GET ${domain}/domain.com/ICON_SIZE \n`
+    out += `@usage ...... GET ${hostBase}/domain.com \n`
+    out += `              GET ${hostBase}/domain.com/ICON_SIZE \n`
     out += `@repo: ...... ${homepage} \n`
     out += `@cdn: ....... ${uriCDN} \n`
     out += `@author: ...  ${author} \n`
     out += `@build: ....  ${env.ENVIRONMENT} \n`
 
-    return new Response(template(out, domain), {
+    return new Response(template(out, hostBase), {
         headers: { 'content-type': types.html }
     })
 }
@@ -417,8 +439,22 @@ export default {
             redirect: 'follow'
         };
 
-        // returns base domain without any params
-        const headersHost = req.headers.get('host') || '';
+        /*
+            returns base domain without any params
+        */
+
+        const host = req.headers.get('host') || '';                     // 127.0.0.1:8787
+        const hostBase = bSubRoute ? `${host}/${route}` : `${host}`     // 127.0.0.1:8787 && 127.0.0.1:8787/get
+        if ( env.ENVIRONMENT === "dev" ) {
+            Logger.var(env, 'host', `${host}`)
+            Logger.var(env, 'hostBase', `${hostBase}`)
+        }
+
+        /*
+            only returns when `?format` found in url
+        */
+
+        const paramFormat = getParams(req.url, 'format')
 
         /*
             Security Headers
@@ -428,7 +464,7 @@ export default {
         */
 
         const DEFAULT_CORS_HEADERS = {
-            'Content-Security-Policy': `default-src 'self' ${headersHost} 'unsafe-inline' https:; img-src 'self';`,
+            'Content-Security-Policy': `default-src 'self' ${host} 'unsafe-inline' https:; img-src 'self';`,
             'Cache-Control': 'max-age=86400, s-maxage=3600',
             'Vary': 'Origin',
             'Access-Control-Max-Age': '86400',
@@ -438,6 +474,16 @@ export default {
         };
 
         /*
+            define > date
+        */
+
+        const now = new Date();
+
+        /*
+            @todo				: switch from requestUrl to pathname
+            searchParams 		= https://domain.com/?url=domain.com
+            pathname 			= /domain.com
+
             Show 'welcome' message if request url is the base domain using regex.
             acceptable domains:
                 - 127.0.0.1 								(development)
@@ -447,36 +493,30 @@ export default {
             this triggers if the user did not append ?url=domain.com to the request url.
         */
 
-        const now = new Date();
+        const hostFull = new URL(req.url);                  // returns base domain + params
+        const hostRegex = new RegExp(/^(https?:\/\/)?(127.0.0.1:(\d+)|searxico.aetherinox.workers.dev|searxico.searxico.workers.dev)\/(?:favicon.ico)?$/,'ig');
+        const bIsHostBase = hostRegex.test(hostFull);        // triggered only when base URL is used without arguments
 
-        /*
-            @todo				: switch from requestUrl to pathname
-            searchParams 		= https://domain.com/?url=domain.com
-            pathname 			= /domain.com
-        */
-
-        const reqURL = new URL(req.url); // returns base domain + params
-        const baseRegex = new RegExp(
-            /^(https?:\/\/)?(127.0.0.1:(\d+)|searxico.aetherinox.workers.dev|searxico.searxico.workers.dev)\/?$/,
-            'ig'
-        );
-        const bIsBaseOnly = baseRegex.test(reqURL); // triggered only when base URL is used without arguments
-
-        /*
-            default page
-        */
-
-        if (bIsBaseOnly || reqURL === headersHost) {
-            return throwHelp(env, headersHost, subroute);
+        if ( env.ENVIRONMENT === "dev" ) {
+            Logger.var(env, 'hostFull', `${hostFull}`)
+            Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
         }
 
         /*
-            check subroute value
+            default page > help / about
+        */
 
-            subroute has everything after the base domain
-                subroute   => get
+        if (bIsHostBase || hostFull === host ) {
+            return throwHelp(env, hostBase);
+        }
 
-            use regex '/^\/get\/?(.*)$/gim' to ensure subroute starts with:
+        /*
+            check route value
+
+            route has everything after the base domain
+                route   => get
+
+            use regex '/^\/get\/?(.*)$/gim' to ensure route starts with:
                 - /get/
 
             example:
@@ -486,12 +526,13 @@ export default {
             help info will be displayed in the next step.
         */
 
-        const regexStartWith = new RegExp(`^\/${subroute}\/?(.*)$`, 'igm');
-        const bStartsWith = regexStartWith.test(reqURL.pathname);
+        const regexStartWith = new RegExp(`^\/${route}\/?(.*)$`, 'igm');
+        const bStartsWith = regexStartWith.test(hostFull.pathname);
 
+        // only needed if subRoute enabled
         if (bSubRoute && !bStartsWith) {
             return new Response(
-                `404 not found – could not find a valid domain. Must use ${headersHost}/${subroute}/domain.com`,
+                `404 not found – could not find a valid domain. Must use ${hostBase}/domain.com`,
                 { status: 404, reason: 'domain not found' }
             );
         }
@@ -504,39 +545,42 @@ export default {
             https://x.x.0.1:8787/get/       returns empty string
         */
 
-        let searchDomain = reqURL.pathname;
+        let paramDomain = hostFull.pathname;
+        if ( env.ENVIRONMENT === "dev" ) {
+            Logger.var(env, 'paramDomain', `${paramDomain}`)
+        }
 
         /*
-            throw help menu if searchDomain:
+            throw help menu if paramDomain:
                 - blank
-                - contains only /subroute
+                - contains only /route
         */
 
         if (bSubRoute) {
-            searchDomain = reqURL.pathname.replace(`/${subroute}/`, '');
-            if (!searchDomain || searchDomain === `/${subroute}`) {
-                return throwHelp(env, headersHost, subroute);
+            paramDomain = hostFull.pathname.replace(`/${route}/`, '');
+            if (!paramDomain || paramDomain === `/${route}`) {
+                return throwHelp(env, host, route);
             }
         } else {
             // clean up forward slash
-            searchDomain = reqURL.pathname.replace(`/`, '');
+            paramDomain = hostFull.pathname.replace(`/`, '');
         }
 
         /*
             Assignment Map
 
-                                     searchDomain
+                                     paramDomain
                                       |────────|
             http://127.0.0.1:8787/get/searxng.org
                   ^─────────────^^──^
-                    headersHost  subroute
+                       host      route
                                 ^───────────────────^
-                                   reqURL.pathname
+                                  hostFull.pathname
             ^───────────────────────────────────^
-                   reqURL     ||    req.url
+                  hostFull    ||    req.url
         */
 
-        const cacheKey = new Request(reqURL.toString(), req);
+        const cacheKey = new Request(hostFull.toString(), req);
         const cache = caches.default;
 
         /*
@@ -545,7 +589,7 @@ export default {
         */
 
         const clientIp =
-            req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || headersHost;
+            req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || host;
 
         /*
             Manually blocked IPs
@@ -667,11 +711,11 @@ export default {
         }
 
         /*
-            'searchDomain' can return either:
+            'paramDomain' can return either:
                 - http://searxng.org/get/searxng.org                => searxng.org
                 - http://searxng.org/get/https://searxng.org        => https://searxng.org
 
-            'url' strips http/s if it exists at the beginnning of searchDomain.
+            'url' strips http/s if it exists at the beginnning of paramDomain.
                 - http://searxng.org/get/searxng.org                => searxng.org
                 - http://searxng.org/get/https://searxng.org        => searxng.org
 
@@ -792,7 +836,6 @@ export default {
             const ext = iconsOverrideIco[iconPath].split(/[#?]/)[0].split('.').pop().trim();
 
             if (ext === 'png' || ext === 'ico') {
-
                 if ( env.ENVIRONMENT === "dev" ) {
                     console.log(
                         `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[ico-png-override]\x1b[0m \x1b[33m${iconPath}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
@@ -1004,8 +1047,8 @@ export default {
             // favicon returns ico and svg url
             if (favicon) {
 
-                let iconPop = favicon.split('.').pop(); // everything after last period (plus period) -- ex:  .ico
-                let iconExt = iconPop.substring(0,3); // filter file extension
+                let iconPop = favicon.split('.').pop();     // everything after last period (plus period) -- ex:  .ico
+                let iconExt = iconPop.substring(0,3);       // filter file extension
 
                 /*
                     HTML Scanner - ICO
