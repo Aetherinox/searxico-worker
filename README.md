@@ -43,10 +43,10 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 <br />
 
+- [Install](#install)
 - [About](#about)
   - [Is This Strictly for SearXNG?](#is-this-strictly-for-searxng)
-  - [How It Works](#how-it-works)
-  - [Usage](#usage)
+- [Usage](#usage)
 - [Methods Utilized:](#methods-utilized)
   - [Self-hosted CDN Repository](#self-hosted-cdn-repository)
   - [Localized Override Table (URLs)](#localized-override-table-urls)
@@ -82,6 +82,22 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 <br />
 
+## Install
+To automatically deploy this Cloudflare worker with minimal setup, click the link below:
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
+
+<br />
+
+If you would like to manually set up the Cloudflare worker and install everything yourself, review the section below:
+- [Advanced Install](#step-1-install-dependencies)
+
+<br />
+
+---
+
+<br />
+
 ## About
 This repository contains the source code you will need to host your own Favicon grabber utilizing a Cloudflare worker (free).
 
@@ -92,58 +108,6 @@ Originally this project was developed around the use of the popular privacy sear
 <br />
 
 When you deploy this worker to Cloudflare, you can enable the ability to either host the worker using your own domain name, or you can use a Cloudflare `worker.dev` domain, which will make the worker available on the web via a browser.
-
-<br />
-
-To automatically deploy this Cloudflare worker with minimal setup, click the link below:
-
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
-
-<br />
-
-If you would like to manually set up the Cloudflare worker and manually install everything, review the section below:
-- [Advanced Install](#step-1-install-dependencies)
-
-<br />
-
-### Is This Strictly for SearXNG?
-No. This worker was made for SearXNG, however, the favicon worker can be used for any service that makes use of a favicon grabber. 
-
-<br />
-
-### How It Works
-The usage of this worker is rather simple. Deploy it by clicking the button above. Once the worker is configured, you will be able to access it within your web browser via the URL Cloudflare assigns you. This is usually `searxico.YourCloudflareUsername.worker.dev`.
-
-<br />
-
-Once you access the domain name for your worker, you can start searching for favicons by providing a domain name. As an example, to find a favicon using the online demo worker, you should search using the url:
-
-- https://searxico.aetherinox.workers.dev/reddit.com
-- https://searxico.aetherinox.workers.dev/reddit.com/64
-
-<br />
-
-The icon image size on the end of the URL is **optional**.
-
-<br />
-
-The worker contains a variety of methods it uses for finding a favicon for a specified domain. If you would like to view the methods available in this worker, view the section below [Methods Utilized](#methods-utilized).
-
-<br />
-
-### Usage
-You can search a website for a favicon using the officially hosted worker, or by hosting your own:
-- https://searxico.aetherinox.workers.dev/google.com/64
-
-If you have enabled the `subroute` setting in `src/index.js`, then you will need to use the URL:
-- https://searxico.aetherinox.workers.dev/get/google.com/64
-
-<br />
-
-| Parameter | Description | Status |
-| --- | --- | --- |
-| `DOMAIN` | Website to grab favicon for<br><sub>Does not need `http`, `https` or `www`</sub> | Required |
-| `ICON_SIZE` | Size of the icon to return | Optional<br><sub>Default: `32`</sub> |
 
 <br />
 
@@ -161,6 +125,42 @@ This worker includes the following features:
 - IP blacklisting / banning
 - Supports sub-routes for users who want to add on `get`, `post` routes
 - Supports Cloudflare worker logs <sup> _`(beta)`_ </sup>
+
+<br />
+
+The worker contains a variety of methods it uses for finding a favicon for a specified domain. If you would like to view the methods available in this worker, view the section below [Methods Utilized](#methods-utilized).
+
+<br />
+
+### Is This Strictly for SearXNG?
+No. This worker was made for [SearXNG](https://searxng.org), however, the favicon worker can be used for any service that makes use of a favicon grabber. 
+
+<br />
+
+---
+
+<br />
+
+## Usage
+The usage of this worker is rather simple. Deploy it by clicking the button above. Once the worker is configured, you will be able to access it within your web browser via the URL Cloudflare assigns you. This is usually `searxico.YourCloudflareUsername.worker.dev`.
+
+<br />
+
+Once you access the domain name for your worker, you can start searching for favicons by providing a domain name. As an example, to find a favicon using the online demo worker, you should search using the url:
+
+- https://searxico.aetherinox.workers.dev/reddit.com
+- https://searxico.aetherinox.workers.dev/reddit.com/64
+
+<br />
+
+The icon image size on the end of the URL is **optional**. Review a list of available paremeters below:
+
+<br />
+
+| Parameter | Description | Status |
+| --- | --- | --- |
+| `DOMAIN` | Website to grab favicon for<br><sub>Does not need `http`, `https` or `www`</sub> | Required |
+| `ICON_SIZE` | Size of the icon to return | Optional<br><sub>Default: `32`</sub> |
 
 <br />
 
