@@ -845,96 +845,104 @@ export default {
         }
 
         /*
-            Find favicon via external service API
+            API
+            this section attempts to fnd an icon using a 3rd party service such as DDG and Google.
         */
 
-        const replacements = { DOMAIN: `${url}`, ICON_SIZE: `${iconSize}` };
+        if (bServiceApiEnabled) {
 
-        /*
-            Replacement strings for service api urls.
+            /*
+                Find favicon via external service API
+            */
 
-            {DOMAIN} will be replaced with the website domain name.
-            {ICON_SIZE} will be replaced with the size of the favicon.
-        */
+            const replacements = { DOMAIN: `${url}`, ICON_SIZE: `${iconSize}` };
 
-        const _serviceQueryUrl = serviceApi.replace(/{(\w+)}/g, (phWithDelims, phNoDelims) =>
-            replacements.hasOwnProperty(phNoDelims) ? replacements[phNoDelims] : phWithDelims
-        );
+            /*
+                Replacement strings for service api urls.
 
-        let serviceQueryUrl = `${_serviceQueryUrl}`;                // returns `https://s2.googleusercontent.com/s2/favicons?domain=microsoft.com&sz=32`
-        let serviceResultIcon = await fetch(serviceQueryUrl);
+                {DOMAIN} will be replaced with the website domain name.
+                {ICON_SIZE} will be replaced with the size of the favicon.
+            */
 
-        /*
-            api > primary
-        */
-
-        const ct = serviceResultIcon.headers.get('content-type');   // returns `image/png`
-
-        if (ct.includes('application') || ct.includes('text')) {
-            serviceResultIcon = await fetch(`${serviceQueryUrl}`);
-        }
-
-        /*
-            api > backup
-
-            this will activate if all previous steps have failed to find a favicon.
-        */
-
-        if (!serviceResultIcon || serviceResultIcon.status !== 200) {
-            const _serviceQueryUrlBackup = serviceApiBackup.replace(
-                /{(\w+)}/g,
-                (phWithDelims, phNoDelims) =>
-                    replacements.hasOwnProperty(phNoDelims)
-                        ? replacements[phNoDelims]
-                        : phWithDelims
+            const _serviceQueryUrl = serviceApi.replace(/{(\w+)}/g, (phWithDelims, phNoDelims) =>
+                replacements.hasOwnProperty(phNoDelims) ? replacements[phNoDelims] : phWithDelims
             );
 
-            serviceQueryUrl = `${_serviceQueryUrlBackup}`;
-            serviceResultIcon = await fetch(serviceQueryUrl);
+            let serviceQueryUrl = `${_serviceQueryUrl}`;                // returns `https://s2.googleusercontent.com/s2/favicons?domain=microsoft.com&sz=32`
+            let serviceResultIcon = await fetch(serviceQueryUrl);
 
-            if ( env.ENVIRONMENT === "dev" ) {
-                console.log(
-                    `\x1b[32m[${workerId}]\x1b[0m FIND \x1b[33m[api-backup]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
-                );
-            } else {
-                console.log(
-                    `[${workerId}] FIND [api-backup] ${serviceQueryUrl} | query by ${clientIp}`
-                );
-            }
-        }
+            /*
+                api > primary
+            */
 
-        /*
-            if a website has a favicon set, then we should have it by now.
-        */
+            const ct = serviceResultIcon.headers.get('content-type');   // returns `image/png`
 
-        if (serviceResultIcon && serviceResultIcon.status === 200) {
-
-            if ( env.ENVIRONMENT === "dev" ) {
-                console.log(
-                    `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[api]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
-                );
-            } else {
-                console.log(
-                    `[${workerId}] FOUND [api] ${serviceQueryUrl} | query by ${clientIp}`
-                );
+            if (ct.includes('application') || ct.includes('text')) {
+                serviceResultIcon = await fetch(`${serviceQueryUrl}`);
             }
 
-            const resp = new Response(serviceResultIcon.body, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...DEFAULT_CORS_HEADERS
+            /*
+                api > backup
+
+                this will activate if all previous steps have failed to find a favicon.
+            */
+
+            if (!serviceResultIcon || serviceResultIcon.status !== 200) {
+                const _serviceQueryUrlBackup = serviceApiBackup.replace(
+                    /{(\w+)}/g,
+                    (phWithDelims, phNoDelims) =>
+                        replacements.hasOwnProperty(phNoDelims)
+                            ? replacements[phNoDelims]
+                            : phWithDelims
+                );
+
+                serviceQueryUrl = `${_serviceQueryUrlBackup}`;
+                serviceResultIcon = await fetch(serviceQueryUrl);
+
+                if ( env.ENVIRONMENT === "dev" ) {
+                    console.log(
+                        `\x1b[32m[${workerId}]\x1b[0m FIND \x1b[33m[api-backup]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                    );
+                } else {
+                    console.log(
+                        `[${workerId}] FIND [api-backup] ${serviceQueryUrl} | query by ${clientIp}`
+                    );
                 }
-            });
-            resp.headers.set('Content-Type', serviceResultIcon.headers.get('content-type'));
-
-            if (favicon.includes(faviconSvg)) {
-                return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
-                    headers: { 'content-type': 'image/svg+xml' },
-                    ...DEFAULT_CORS_HEADERS
-                });
             }
 
-            return resp;
+            /*
+                if a website has a favicon set, then we should have it by now.
+            */
+
+            if (serviceResultIcon && serviceResultIcon.status === 200) {
+
+                if ( env.ENVIRONMENT === "dev" ) {
+                    console.log(
+                        `\x1b[32m[${workerId}]\x1b[0m FOUND \x1b[33m[api]\x1b[0m \x1b[33m${serviceQueryUrl}\x1b[0m \x1b[90m|\x1b[0m query by \x1b[32m${clientIp}\x1b[0m`
+                    );
+                } else {
+                    console.log(
+                        `[${workerId}] FOUND [api] ${serviceQueryUrl} | query by ${clientIp}`
+                    );
+                }
+
+                const resp = new Response(serviceResultIcon.body, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...DEFAULT_CORS_HEADERS
+                    }
+                });
+                resp.headers.set('Content-Type', serviceResultIcon.headers.get('content-type'));
+
+                if (favicon.includes(faviconSvg)) {
+                    return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
+                        headers: { 'content-type': 'image/svg+xml' },
+                        ...DEFAULT_CORS_HEADERS
+                    });
+                }
+
+                return resp;
+            }
         }
 
         /*

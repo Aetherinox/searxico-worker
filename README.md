@@ -15,6 +15,9 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 <img src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/banner.png" height="230">
 
 <br />
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
+
 <br />
 
 </div>
@@ -68,6 +71,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
     - [Whoami](#whoami)
     - [List Packages](#list-packages)
     - [Deploy](#deploy)
+    - [Deploy - Dry-run (Dist)](#deploy---dry-run-dist)
     - [Delete](#delete)
 - [Contributors ✨](#contributors-)
 
@@ -79,6 +83,12 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 ## About
 With the introduction of favicons into the SearXNG self-hosted search engine, this repository allows you to run your own favicon grabber service that can be used in combination with existing favicon services, or as its own stand-alone worker.
+
+<br />
+
+To automatically deploy this Cloudflare worker with minimal setup, click the link below:
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
 
 <br />
 
@@ -117,7 +127,6 @@ This worker includes the following features:
 - IP blacklisting / banning
 - Supports sub-routes for users who want to add on `get`, `post` routes
 - Supports Cloudflare worker logs <sup> _`(beta)`_ </sup>
-- 
 
 <br />
 
@@ -863,8 +872,17 @@ npx wrangler deploy [<SCRIPT>] [OPTIONS]
 npx wrangler deploy --minify -e production
 ```
 
-> [!NOTE] OPTIONS
+> [!NOTE]
 > None of the options for this command are required. Also, many can be set in your `wrangler.toml` file. Refer to the [`wrangler.toml` configuration](https://developers.cloudflare.com/workers/wrangler/configuration/) documentation for more information.
+
+<br /><br />
+
+#### Deploy - Dry-run (Dist)
+The following command will build a dry-run compiled version of your index.js file which will be placed in the `dist/` folder
+
+```shell ignore
+npx wrangler deploy --dry-run --outdir dist -e production
+```
 
 <br /> <br />
 
