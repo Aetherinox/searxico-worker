@@ -45,15 +45,16 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 - [About](#about)
   - [Is This Strictly for SearXNG?](#is-this-strictly-for-searxng)
+  - [How It Works](#how-it-works)
   - [Usage](#usage)
-- [How It Works](#how-it-works)
+- [Methods Utilized:](#methods-utilized)
   - [Self-hosted CDN Repository](#self-hosted-cdn-repository)
   - [Localized Override Table (URLs)](#localized-override-table-urls)
   - [Localized Override Table (SVG Path)](#localized-override-table-svg-path)
   - [API Service](#api-service)
   - [Domain Code Scan](#domain-code-scan)
   - [Default Logo](#default-logo)
-- [Step 1: Install Dependencies](#step-1-install-dependencies)
+- [Step 1 Install Dependencies](#step-1-install-dependencies)
 - [Step 2: Deploy Test Server](#step-2-deploy-test-server)
 - [Step 3: Customizing Worker](#step-3-customizing-worker)
   - [Sub-Route Support](#sub-route-support)
@@ -82,7 +83,15 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 <br />
 
 ## About
-With the introduction of favicons into the SearXNG self-hosted search engine, this repository allows you to run your own favicon grabber service that can be used in combination with existing favicon services, or as its own stand-alone worker.
+This repository contains the source code you will need to host your own Favicon grabber utilizing a Cloudflare worker (free).
+
+<br />
+
+Originally this project was developed around the use of the popular privacy search engine SearXNG, however, the worker can be used on its own, or can be integrated with any other application which makes use of a favicon grabber service simply by providing the absolute URL to where your worker is hosted.
+
+<br />
+
+When you deploy this worker to Cloudflare, you can enable the ability to either host the worker using your own domain name, or you can use a Cloudflare `worker.dev` domain, which will make the worker available on the web via a browser.
 
 <br />
 
@@ -92,8 +101,33 @@ To automatically deploy this Cloudflare worker with minimal setup, click the lin
 
 <br />
 
+If you would like to manually set up the Cloudflare worker and manually install everything, review the section below:
+- [Advanced Install](#step-1-install-dependencies)
+
+<br />
+
 ### Is This Strictly for SearXNG?
 No. This worker was made for SearXNG, however, the favicon worker can be used for any service that makes use of a favicon grabber. 
+
+<br />
+
+### How It Works
+The usage of this worker is rather simple. Deploy it by clicking the button above. Once the worker is configured, you will be able to access it within your web browser via the URL Cloudflare assigns you. This is usually `searxico.YourCloudflareUsername.worker.dev`.
+
+<br />
+
+Once you access the domain name for your worker, you can start searching for favicons by providing a domain name. As an example, to find a favicon using the online demo worker, you should search using the url:
+
+- https://searxico.aetherinox.workers.dev/reddit.com
+- https://searxico.aetherinox.workers.dev/reddit.com/64
+
+<br />
+
+The icon image size on the end of the URL is **optional**.
+
+<br />
+
+The worker contains a variety of methods it uses for finding a favicon for a specified domain. If you would like to view the methods available in this worker, view the section below [Methods Utilized](#methods-utilized).
 
 <br />
 
@@ -134,7 +168,7 @@ This worker includes the following features:
 
 <br />
 
-## How It Works
+## Methods Utilized:
 This worker contains a wide variety of methods that the worker tries to use in order to obtain a favicon from a website. These methods are listed below, and in the order of priority that they are ran in the worker:
 
 <br />
@@ -237,7 +271,7 @@ It should be worth noting that a test was conducted with over 1,000 domains. Out
 
 <br />
 
-## Step 1: Install Dependencies
+## Step 1 Install Dependencies
 You will need to register for a Cloudflare account if you have not already. First, we need to grab the files from this repo. Create a new project folder where everything will be stored.
 
 ```shell
