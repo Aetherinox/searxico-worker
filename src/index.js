@@ -34,6 +34,7 @@
 
 import template from './html.js'
 import types from './types.js'
+import clr from './clr.js'
 import { version, author, homepage } from "./package.json";
 
 /*
