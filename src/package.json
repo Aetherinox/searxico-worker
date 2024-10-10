@@ -1,6 +1,6 @@
 {
     "name": "@aetherinox/searxico-worker",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "A self-hosted favicon cloudflare worker for SearXNG Search Engine.",
     "homepage": "https://github.com/aetherinox/searxico-worker",
     "homepage_cdn": "https://github.com/aetherinox/searxico-cdn",

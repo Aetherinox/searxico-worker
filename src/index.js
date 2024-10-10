@@ -35,6 +35,8 @@
     Imports
 */
 
+import template from './html.js'
+import types from './types.js'
 import { version, author, homepage } from "./package.json";
 
 /*
@@ -164,26 +166,24 @@ const favicoDefaultSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5
 */
 
 function throwHelp(env, host, subroute) {
-    let out = `Searxico Favicon Grabber ${version} \n\n`;
-    if (bSubRoute) {
-        out += `@usage ...... GET ${host}/${subroute}/domain.com \n`
-        out += `@usage ...... GET ${host}/${subroute}/domain.com/ICON_SIZE \n`
-    } else {
-        out += `@usage ...... GET ${host}/domain.com \n`
-        out += `@usage ...... GET ${host}/domain.com/ICON_SIZE \n`
-    }
+    let out = `Searxico Favicon Grabber v${version} \n\n`;
+    const domain = bSubRoute ? `${host}/${subroute}` : `${host}`
 
     if ( env.ENVIRONMENT === "dev" ) {
         console.log("Environment Dump");
         console.log(env)
     }
 
+    out += `@usage ...... GET ${domain}/domain.com \n`
+    out += `              GET ${domain}/domain.com/ICON_SIZE \n`
     out += `@repo: ...... ${homepage} \n`
     out += `@cdn: ....... ${uriCDN} \n`
     out += `@author: ...  ${author} \n`
     out += `@build: ....  ${env.ENVIRONMENT} \n`
 
-    return new Response(out);
+    return new Response(template(out, domain), {
+        headers: { 'content-type': types.html }
+    })
 }
 
 /*
@@ -396,7 +396,7 @@ export default {
 
     async fetch(req, env, ctx) {
         const init = {
-            headers: { 'content-type': 'text/html;charset=UTF-8' },
+            headers: { 'content-type': types.html },
             redirect: 'follow'
         };
 
@@ -813,7 +813,7 @@ export default {
 
             let customSvgIcon = new Response(iconsOverrideSvg[iconPath], {
                 headers: {
-                    'content-type': 'image/svg+xml',
+                    'content-type': types.svg,
                     ...DEFAULT_CORS_HEADERS
                 }
             });
@@ -928,7 +928,7 @@ export default {
 
                 const resp = new Response(serviceResultIcon.body, {
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': types.json,
                         ...DEFAULT_CORS_HEADERS
                     }
                 });
@@ -936,7 +936,7 @@ export default {
 
                 if (favicon.includes(faviconSvg)) {
                     return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
-                        headers: { 'content-type': 'image/svg+xml' },
+                        headers: { 'content-type': types.html },
                         ...DEFAULT_CORS_HEADERS
                     });
                 }
@@ -1013,7 +1013,7 @@ export default {
 
                     const RespIcon = new Response(svgHtml, {
                         headers: {
-                            'Content-Type': 'image/svg+xml',
+                            'Content-Type': types.svg,
                             'Accept-Encoding': 'gzip, svgz',
                             ...DEFAULT_CORS_HEADERS
                         }
@@ -1089,7 +1089,7 @@ export default {
 
         let favicoDefault = new Response(favicoDefaultSvg, {
             headers: {
-                'content-type': 'image/svg+xml',
+                'content-type': types.svg,
                 ...DEFAULT_CORS_HEADERS
             }
         });
