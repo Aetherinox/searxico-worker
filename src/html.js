@@ -406,7 +406,7 @@ const template = ( console, domain ) =>`
 
         .logo > span {
             display: inline-block;
-            color: #dadada;
+            color: rgb(140, 140, 140);
         }
 
         .logo--muted {
@@ -452,7 +452,7 @@ const template = ( console, domain ) =>`
         }
 
         .btn-exit {
-            background-color: #539862;
+            background-color: rgb(83, 71, 140);
         }
 
         .btn-exit-ico
@@ -558,7 +558,7 @@ const template = ( console, domain ) =>`
         <div class="Panel">
             <div class="Panel--top">
                 <h1>
-                    <a href="${domain}" class="Link Link-without-underline">
+                    <a href="https://${domain}" class="Link Link-without-underline">
                         <span class="logo">
                             <span>${domain}</span>
                         </span>
@@ -610,7 +610,7 @@ const template = ( console, domain ) =>`
             </div>
             <div class="Dialog--actions">
                 <div class="Row">
-                    <button class="Button btn-exit" dialog-close dialog-autofocus><img class="btn-exit-ico" width="16" height="16" src="https://cdn3.iconfinder.com/data/icons/pyconic-icons-1-2/512/close-512.png"> Exit</button>
+                    <button class="Button btn-exit" dialog-close dialog-autofocus><img class="btn-exit-ico" width="16" height="16" src="https://cdn3.iconfinder.com/data/icons/pyconic-icons-1-2/512/close-512.png"> Close</button>
                     <button class="Button btn-deploy" dialog-close data-js-button-deploy><img class="btn-deploy-ico" width="16" height="16" src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/1/cloudflare-workers-icon-jsii6pml8tdp4sy8kgarwe.png/cloudflare-workers-icon-gfyr5fw7aqcwsa1on45oem.png"> Deploy</button>
                 </div>
             </div>
