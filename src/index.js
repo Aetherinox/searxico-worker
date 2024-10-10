@@ -237,7 +237,26 @@ function handleIconName(url) {
 }
 
 /*
-    Service > Get Random
+    Get Params
+*/
+
+function getParams(url, name) {
+    name = name.replace(/[\[\]]/g, '\\$&')
+    name = name.replace(/\//g, '')
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url)
+
+    if (!results) return null
+    else if (!results[2]) return ''
+    else if (results[2]) {
+        results[2] = results[2].replace(/\//g, '')
+    }
+
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/*
+    Service API > Get Random
 
     @usage          serviceRand(services)
 */
@@ -660,7 +679,13 @@ export default {
         */
 
         let favicon = '';
-        const url = searchDomain.replace(/^(?:https?:\/\/)?(?:www\.)?/gi, '');
+        const url = paramDomain.replace(/^(?:https?:\/\/)?(?:www\.)?/gi, '');
+        if (!url) {
+            return new Response(template('error: invalid url', hostBase), {
+                headers: { 'content-type': types.html }
+            })
+        }
+
         const targetURL = new URL(url.startsWith('https') ? url : 'https://' + url);
 
         /*
@@ -932,13 +957,24 @@ export default {
                 resp.headers.set('Content-Type', serviceResultIcon.headers.get('content-type'));
 
                 if (favicon.includes(faviconSvg)) {
-                    return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
-                        headers: { 'content-type': types.html },
+                    return new Response('d', {
+                        headers: { 'content-type': types.json },
                         ...DEFAULT_CORS_HEADERS
                     });
                 }
 
-                return resp;
+                if (paramFormat === 'json') {
+                    const url = `${serviceQueryUrl}`
+                    const size = `${iconSize}`
+                    const client = `${clientIp}`
+                    const status = `${serviceResultIcon.status}`
+
+                    return jsonResp({ url, size, client, status }, true)
+                }
+                else
+                {
+                    return resp;
+                }
             }
         }
 
