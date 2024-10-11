@@ -456,7 +456,7 @@ export default {
 
         const host = req.headers.get('host') || '';                                         // 127.0.0.1:8787
         const hostFull = new URL(req.url);                                                  // http://127.0.0.1:8787/
-        const hostBase = bSubRoute ? `${host}/${route}` : `${host}`                         // 127.0.0.1:8787/favicon
+        const hostBase = bSubRoute ? `${host}/${route}` : `${host}`                         // 127.0.0.1:8787/get
         const hostAbso = bSubRoute ? `${hostFull.origin}/${route}` : `${hostFull.origin}`   // http://127.0.0.1:8787/get
         const bIsHostBase = hostRegex.test(hostFull);                                       // triggered only when base URL is used without arguments
 
@@ -530,8 +530,8 @@ export default {
             help info will be displayed in the next step.
         */
 
-        const regexStartWith = new RegExp(`^\/${route}\/?(.*)$`, 'igm');
-        const bStartsWith = regexStartWith.test(hostFull.pathname);
+        const regexContainsRoute = new RegExp(`^\/${route}\/?(.*)$`, 'igm');
+        const bStartsWith = regexContainsRoute.test(hostFull.pathname);
 
         // only needed if subRoute enabled
         if (bSubRoute && !bStartsWith) {
