@@ -1,4 +1,4 @@
-const template = ( console, domain ) =>`
+const template = ( console, domain, host ) =>`
 <!doctype html>
 <html lang="en" with-selection-styled>
   <head>
@@ -9,7 +9,7 @@ const template = ( console, domain ) =>`
     <title>Favicon Grabber · Powered by Cloudflare Workers®</title>
 
     <meta name="description" content="Favicon grabber powered by Cloudflare Workers®.">
-    <meta name="keywords" content=""favicon", "favico", favicon grabber, favicon capture, favicon downloader, Cloudflare Workers, Cloudflare®, app">
+    <meta name="keywords" content="favicon, favico, favicon grabber, favicon capture, favicon downloader, Cloudflare Workers, Cloudflare®, app">
     <meta name="author" content="Aetherinox">
     <meta name="generator" content="Aetherinox">
 
@@ -182,7 +182,6 @@ const template = ( console, domain ) =>`
         })()
     </script>
 
-
     <style>
         html {
             --font-family: Avenir, system-ui, sans-serif;
@@ -226,7 +225,7 @@ const template = ( console, domain ) =>`
         }
 
         figure {
-            background-image: url("https://raw.githubusercontent.com/Aetherinox/searxico-worker/4433dfde95a9b0680e42765b209a65a10cba28db/src/assets/img/1.jpg");
+            background-image: url("https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/src/assets/img/1.jpg");
             background-size: cover;
         }
 
@@ -342,10 +341,28 @@ const template = ( console, domain ) =>`
             opacity: 0.3;
         }
 
-        .Panel--bottom {
+        #status
+        {
             position: relative;
             z-index: 1;
             margin-top: auto;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+            padding-left: 10px;
+            padding-right: 10px;
+            font-size: 10pt;
+            text-align: center;
+            color: #A6A6A6;
+        }
+
+        #status > .url {
+            color: rgb(255, 122, 166);
+        }
+
+        .Panel--bottom {
+            padding: 5px;
+            position: relative;
+            z-index: 1;
             padding-top: 1em;
             padding-bottom: 1em;
             background: #1a1d1e;
@@ -558,9 +575,9 @@ const template = ( console, domain ) =>`
         <div class="Panel">
             <div class="Panel--top">
                 <h1>
-                    <a href="https://${domain}" class="Link Link-without-underline">
+                    <a href="${domain}" class="Link Link-without-underline">
                         <span class="logo">
-                            <span>${domain}</span>
+                            <span>${host}</span>
                         </span>
                     </a>
                 </h1>
@@ -577,14 +594,15 @@ const template = ( console, domain ) =>`
                     </div>
                 </form>
             </main>
+            <div id="status">Ready</div>
             <div class="Panel--bottom">
                 <div class="Row">
                     <center>
                     <button class="Button btn-grab" type="submit" form="form">
-                        <span class="desktop-only"><img class="btn-grab-ico" width="16" height="16" src="https://cdn-icons-png.freepik.com/512/438/438524.png"> Grab Icon</span>
+                        <span class="desktop-only"><img class="btn-grab-ico" width="16" height="16" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/src/assets/ico/action_grab.png"> Grab Icon</span>
                         <span class="mobile-only">Fetch</span>
                     </button>
-                    <a data-js-button-github href="https://github.com/Aetherinox/searxico-worker" class="Button btn-github" type="button"><img class="btn-github-ico" width="16" height="16" src="https://cdn-icons-png.flaticon.com/512/25/25231.png"> Github</a>
+                    <a data-js-button-github href="https://github.com/Aetherinox/searxico-worker" class="Button btn-github" type="button"><img class="btn-github-ico" width="16" height="16" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/src/assets/ico/action_github.png"> Github</a>
                     </center>
                 </div>
             </div>
@@ -610,8 +628,8 @@ const template = ( console, domain ) =>`
             </div>
             <div class="Dialog--actions">
                 <div class="Row">
-                    <button class="Button btn-exit" dialog-close dialog-autofocus><img class="btn-exit-ico" width="16" height="16" src="https://cdn3.iconfinder.com/data/icons/pyconic-icons-1-2/512/close-512.png"> Close</button>
-                    <button class="Button btn-deploy" dialog-close data-js-button-deploy><img class="btn-deploy-ico" width="16" height="16" src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/1/cloudflare-workers-icon-jsii6pml8tdp4sy8kgarwe.png/cloudflare-workers-icon-gfyr5fw7aqcwsa1on45oem.png"> Deploy</button>
+                    <button class="Button btn-exit" dialog-close dialog-autofocus><img class="btn-exit-ico" width="16" height="16" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/src/assets/ico/action_close.png"> Close</button>
+                    <button class="Button btn-deploy" dialog-close data-js-button-deploy><img class="btn-deploy-ico" width="16" height="16" src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/src/assets/ico/action_cfworker.png"> Deploy</button>
                 </div>
             </div>
             <div class="Dialog--close-positioner">
@@ -661,7 +679,8 @@ const template = ( console, domain ) =>`
             for (obj in data)
             {
                 const fieldEl = getElement(obj)
-                if (fieldEl && fieldEl.value !== '') pristine = false
+                if (fieldEl && fieldEl.value !== '')
+                    pristine = false
             }
 
             for (obj in data)
@@ -677,7 +696,8 @@ const template = ( console, domain ) =>`
         let lastUrl = btnGithub.href
         const update = ( ) =>
         {
-            if ( form.checkValidity && !form.checkValidity( ) ) return
+            if ( form.checkValidity && !form.checkValidity( ) )
+                return
 
             const data = new FormData(form)
             const data_url = data.get("url");
@@ -689,17 +709,16 @@ const template = ( console, domain ) =>`
             lastUrl = url
 
             if (data.get('url'))
-            {
-                btnGithub.href = url
                 fetchURL(url)
-            }
         }
 
         async function fetchURL( url )
         {
-            const response = await fetch( url )
-            window.location.href = url;
-            console.textContent = "$console"
+            const data = new FormData(form)
+            //const response = await fetch( url )
+            document.getElementById("status").innerHTML = \`Fetching icon for <span class="url">\` + data.get("url") + \`</span>\`
+            window.location.href = \`${domain}\` + url
+            console.textContent = \`${console}\`
         }
 
         form.addEventListener( 'submit', event =>
