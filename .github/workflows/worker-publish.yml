@@ -1,14 +1,14 @@
 # #
-#   @parent     : github workflow
-#   @desc       : publish release to github
-#                 version of release fetched from /src/package.json.
-#                 ensure `cloudflare/wrangler-action@v3` worker uses env variable "production"
-#   @author     : Aetherinox
-#   @url        : https://github.com/Aetherinox
+#   @parent         github workflow
+#   @desc           publish release to github
+#                     version of release fetched from /src/package.json.
+#                     ensure `cloudflare/wrangler-action@v3` worker uses env variable "production"
+#   @author         Aetherinox
+#   @url            https://github.com/Aetherinox
 # #
 
+run-name: "🌑 Cloudflare Worker › Release"
 name: "☁️ Worker › Release"
-run-name: "☁️ Worker › Release"
 
 # #
 #   triggers
@@ -18,10 +18,10 @@ on:
     workflow_dispatch:
         inputs:
 
-          # ---------------------------------------------------------------------------------------
+          # #
           #   Name of the plugin to use when creating the release zip filename
           #     e.g: searxico-cf-worker-v1.0.0.zip
-          # ---------------------------------------------------------------------------------------
+          # #
 
           PLUGIN_NAME:
               description:  "📦 Name of App"
@@ -29,10 +29,10 @@ on:
               default:      'searxico'
               type:         string
 
-          # ---------------------------------------------------------------------------------------
+          # #
           #   ENABLE:   the changelog generated in releases tab will only display single commits.
           #   DISABLE:  the changelog shows pull requests completed based on their labels
-          # ---------------------------------------------------------------------------------------
+          # #
 
           CHANGELOG_MODE_COMMIT:
               description:  "📑 Use Commits Instead of PRs"
@@ -40,12 +40,12 @@ on:
               default:      true
               type:         boolean
 
-          # ---------------------------------------------------------------------------------------
+          # #
           #   ENABLE:   Will show all types of commits, including uncategorized
           #   DISABLE:  WIll only show actions that have been categorized using the format
           #                type(scope): description
           #                type: description
-          # ---------------------------------------------------------------------------------------
+          # #
 
           SHOW_UNCATEGORIZED:
               description:  "🗂️ Show Uncategorized Commits"
@@ -53,10 +53,10 @@ on:
               default:      false
               type:         boolean
 
-          # ---------------------------------------------------------------------------------------
+          # #
           #   ENABLE:   released version will be marked as pre-release
           #   DISABLE:  release version will be marked as stable / normal release
-          # ---------------------------------------------------------------------------------------
+          # #
 
           PRERELEASE:
               description:  "🧪 Build RC (Pre-release)"
@@ -64,11 +64,11 @@ on:
               default:      false
               type:         boolean
 
-          # ---------------------------------------------------------------------------------------
+          # #
           #   Release Candidate version number
           #   this will be added to the end of your released app in the releases page.
           #     e.g: searxico-cf-worker-v1.0.0-rc.1
-          # ---------------------------------------------------------------------------------------
+          # #
 
           VERSION_RC:
               description:  "🧪 RC (Pre-release) Ver (searxico-cf-worker-rc.v1)"
@@ -86,6 +86,7 @@ env:
     SHOW_UNCATEGORIZED:     false
     PRERELEASE:             false
     VERSION_RC:             '1'
+    WORKER_ID:              'favicon'
     FOLDER_DIST:            'dist'
     BOT_NAME_1:             AdminServ
     BOT_NAME_2:             AdminServX
@@ -661,8 +662,14 @@ jobs:
             # #
             #   Job > Complete > Cloudflare > Check Project
             #   this step checks to see if your project already exists on cloudflare
-            #   today        date --utc +%FT%TZ
-            #   yesterday    date --utc -d '-1 day' '+%FT%TZ'
+            #       today        date --utc +%FT%TZ
+            #       yesterday    date --utc -d '-1 day' '+%FT%TZ'
+            #
+            #   Endpoint `/workers/scripts/` requires Cloudflare API permission:
+            #       Workers Scripts:Read
+            #
+            #   Endpoint `https://api.cloudflare.com/client/v4/graphql` requires Cloudflare API permission:
+            #       Account Analytics:Read
             # #
 
             - name: "☁️ CF › Check Project"
@@ -672,12 +679,12 @@ jobs:
                   yesturday=$(date --utc -d '-1 day' '+%FT%TZ')
                   now=$(date --utc +%FT%TZ)
 
-                  worker_env=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/searxico/settings/" \
+                  worker_env=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/${{ env.WORKER_ID }}/settings/" \
                     -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
                     -H "Content-Type:application/json" | jq -r '.result.bindings[0].text')
                   echo "WORKER_ENV=$worker_env" >> $GITHUB_ENV
 
-                  worker_compatdate=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/searxico/settings/" \
+                  worker_compatdate=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/${{ env.WORKER_ID }}/settings/" \
                     -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
                     -H "Content-Type:application/json" | jq -r '.result.compatibility_date')
                   echo "WORKER_COMPATDATE=$worker_compatdate" >> $GITHUB_ENV
@@ -704,7 +711,7 @@ jobs:
                       \"accountTag\": \"${{ secrets.CF_ACCOUNT_ID }}\",
                       \"datetimeStart\": \"$yesturday\",
                       \"datetimeEnd\": \"$now\",
-                      \"scriptName\": \"searxico\"
+                      \"scriptName\": \"${{ env.WORKER_ID }}\"
                     }
                   }" | curl --silent \
                   https://api.cloudflare.com/client/v4/graphql \

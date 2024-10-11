@@ -1,9 +1,9 @@
 # #
-#   @parent     : github workflow
-#   @desc       : resets daily limits imposed by workflow.
-#                 to be ran at midnight UTC daily.
-#   @author     : Aetherinox
-#   @url        : https://github.com/Aetherinox
+#   @parent         github workflow
+#   @desc           resets daily limits imposed by workflow.
+#                       to be ran at midnight UTC daily.
+#   @author         Aetherinox
+#   @url            https://github.com/Aetherinox
 # #
 
 run-name: "🌑 Cloudflare Worker Nightly Reset"
