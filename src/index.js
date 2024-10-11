@@ -186,7 +186,7 @@ Logger.var = function(env, id, a ) {
     @returns    : Response
 */
 
-function throwHelp(env, hostAbso, host) {
+function throwHelp(env, hostBase) {
     let out = `Searxico Favicon Grabber v${version} \n\n`;
 
     if ( env.ENVIRONMENT === "dev" ) {
@@ -194,14 +194,14 @@ function throwHelp(env, hostAbso, host) {
         console.log(env)
     }
 
-    out += `@usage ...... GET ${hostAbso}/domain.com \n`
-    out += `              GET ${hostAbso}/domain.com/ICON_SIZE \n`
+    out += `@usage ...... GET ${hostBase}/domain.com \n`
+    out += `              GET ${hostBase}/domain.com/ICON_SIZE \n`
     out += `@repo: ...... ${homepage} \n`
     out += `@cdn: ....... ${uriCDN} \n`
     out += `@author: ...  ${author} \n`
     out += `@build: ....  ${env.ENVIRONMENT} \n`
 
-    return new Response(template(out, hostAbso, host), {
+    return new Response(template(out, hostBase), {
         headers: { 'content-type': types.html }
     })
 }
@@ -440,33 +440,14 @@ export default {
         };
 
         /*
-            Show 'welcome' message if request url is the base domain using regex.
-                acceptable domains:
-                    - 127.0.0.1 								(development)
-                    - searxico.aetherinox.workers.dev 			(development)
-
-            this triggers if the user did not append ?url=domain.com to the request url.
+            returns base domain without any params
         */
 
-        const hostRegex = new RegExp(/^(https?:\/\/)?(127.0.0.1:(\d+)|searxico.aetherinox.workers.dev|searxico.searxico.workers.dev)\/(?:favicon.ico)?$/,'ig');
-
-        /*
-            return all of the values we'll need
-        */
-
-        const host = req.headers.get('host') || '';                                         // 127.0.0.1:8787
-        const hostFull = new URL(req.url);                                                  // http://127.0.0.1:8787/
-        const hostBase = bSubRoute ? `${host}/${route}` : `${host}`                         // 127.0.0.1:8787/get
-        const hostAbso = bSubRoute ? `${hostFull.origin}/${route}` : `${hostFull.origin}`   // http://127.0.0.1:8787/get
-        const bIsHostBase = hostRegex.test(hostFull);                                       // triggered only when base URL is used without arguments
-
+        const host = req.headers.get('host') || '';                     // 127.0.0.1:8787
+        const hostBase = bSubRoute ? `${host}/${route}` : `${host}`     // 127.0.0.1:8787 && 127.0.0.1:8787/get
         if ( env.ENVIRONMENT === "dev" ) {
             Logger.var(env, 'host', `${host}`)
-            Logger.var(env, 'hostFull', `${hostFull}`)
             Logger.var(env, 'hostBase', `${hostBase}`)
-            Logger.var(env, 'hostAbso', `${hostAbso}`)
-            Logger.var(env, 'route', `${route}`)
-            Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
         }
 
         /*
@@ -493,25 +474,40 @@ export default {
         };
 
         /*
-            get client ip address
-            x-real-ip can be altered by the client. prioritize cf-connecting-ip first.
-        */
-
-        const clientIp =
-            req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || host;
-
-        /*
             define > date
         */
 
         const now = new Date();
 
         /*
+            @todo				: switch from requestUrl to pathname
+            searchParams 		= https://domain.com/?url=domain.com
+            pathname 			= /domain.com
+
+            Show 'welcome' message if request url is the base domain using regex.
+            acceptable domains:
+                - 127.0.0.1 								(development)
+                - favicon.aetherinox.workers.dev 			(development)
+                - favicon.searxico.workers.dev 				(production)
+
+            this triggers if the user did not append ?url=domain.com to the request url.
+        */
+
+        const hostFull = new URL(req.url);                  // returns base domain + params
+        const hostRegex = new RegExp(/^(https?:\/\/)?(127.0.0.1:(\d+)|searxico.aetherinox.workers.dev|searxico.searxico.workers.dev)\/(?:favicon.ico)?$/,'ig');
+        const bIsHostBase = hostRegex.test(hostFull);        // triggered only when base URL is used without arguments
+
+        if ( env.ENVIRONMENT === "dev" ) {
+            Logger.var(env, 'hostFull', `${hostFull}`)
+            Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
+        }
+
+        /*
             default page > help / about
         */
 
         if (bIsHostBase || hostFull === host ) {
-            return throwHelp(env, hostAbso, host);
+            return throwHelp(env, hostBase);
         }
 
         /*
@@ -530,20 +526,23 @@ export default {
             help info will be displayed in the next step.
         */
 
-        const regexContainsRoute = new RegExp(`^\/${route}\/?(.*)$`, 'igm');
-        const bStartsWith = regexContainsRoute.test(hostFull.pathname);
+        const regexStartWith = new RegExp(`^\/${route}\/?(.*)$`, 'igm');
+        const bStartsWith = regexStartWith.test(hostFull.pathname);
 
         // only needed if subRoute enabled
         if (bSubRoute && !bStartsWith) {
-            return jsonErr(`404 not found – could not find a valid domain. Must use ${hostBase}/domain.com`, 404, true)
+            return new Response(
+                `404 not found – could not find a valid domain. Must use ${hostBase}/domain.com`,
+                { status: 404, reason: 'domain not found' }
+            );
         }
 
         /*
             Get base domain
             this is everything starting with the first forward slash
 
-            https://x.x.0.1:8787/get            returns /get
-            https://x.x.0.1:8787/get/           returns empty string
+            https://x.x.0.1:8787/get        returns /get
+            https://x.x.0.1:8787/get/       returns empty string
         */
 
         let paramDomain = hostFull.pathname;
@@ -560,7 +559,7 @@ export default {
         if (bSubRoute) {
             paramDomain = hostFull.pathname.replace(`/${route}/`, '');
             if (!paramDomain || paramDomain === `/${route}`) {
-                return throwHelp(env, hostBase, host);
+                return throwHelp(env, host, route);
             }
         } else {
             // clean up forward slash
@@ -585,6 +584,14 @@ export default {
         const cache = caches.default;
 
         /*
+            get client ip address
+            x-real-ip can be altered by the client. prioritize cf-connecting-ip first.
+        */
+
+        const clientIp =
+            req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || host;
+
+        /*
             Manually blocked IPs
 
             127.0.0.11:8787 for testing
@@ -604,7 +611,8 @@ export default {
             }
 
             return new Response(
-                jsonErr(`403 forbidden – you cannot access this service from ${clientIp}: Reason: ${reason}`, 403, true)
+                `403 forbidden – you cannot access this service from ${clientIp}: Reason: ${reason}`,
+                { status: 403, reason: reason }
             );
         }
 
@@ -625,9 +633,7 @@ export default {
                 );
             }
 
-            return new Response(
-                jsonErr(`403 forbidden – Block User Agent containing bot`, 403, true)
-            );
+            return new Response(`403 - Block User Agent containing bot`, { status: 403 });
         }
 
         /*
@@ -720,7 +726,7 @@ export default {
         let favicon = '';
         const url = paramDomain.replace(/^(?:https?:\/\/)?(?:www\.)?/gi, '');
         if (!url) {
-            return new Response(template('error: invalid url', hostAbso, host), {
+            return new Response(template('error: invalid url', hostBase), {
                 headers: { 'content-type': types.html }
             })
         }
@@ -995,7 +1001,7 @@ export default {
                 resp.headers.set('Content-Type', serviceResultIcon.headers.get('content-type'));
 
                 if (favicon.includes(faviconSvg)) {
-                    return new Response(decodeURI(favicon.split(faviconSvg)[1]), {
+                    return new Response('d', {
                         headers: { 'content-type': types.json },
                         ...DEFAULT_CORS_HEADERS
                     });
