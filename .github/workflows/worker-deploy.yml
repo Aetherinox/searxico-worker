@@ -1,0 +1,377 @@
+# #
+#   @parent         github workflow
+#   @desc           publish release to github
+#                     deploy current cloudflare worker without publishing a release to github
+#   @author         Aetherinox
+#   @url            https://github.com/Aetherinox
+# #
+
+run-name: "🌑 Cloudflare Worker › Deploy"
+name: "☁️ Worker › Deploy"
+
+# #
+#   triggers
+# #
+
+on:
+    workflow_dispatch:
+        inputs:
+
+          # #
+          #   Name of the plugin to use when creating the release zip filename
+          #     e.g: searxico-cf-worker-v1.0.0.zip
+          # #
+
+          PLUGIN_NAME:
+              description:  "📦 Name of App"
+              required:     true
+              default:      'searxico-cf-worker'
+              type:         string
+
+          ENVIRONMENT:
+              description:  "📦 Environment: <dev|production>"
+              required:     true
+              default:      'production'
+              type:         choice
+              options:
+                - dev
+                - production
+
+# #
+#   environment variables
+# #
+
+env:
+    PLUGIN_NAME:            ${{ github.event.inputs.PLUGIN_NAME || 'searxico' }}
+    CHANGELOG_MODE_COMMIT:  true
+    SHOW_UNCATEGORIZED:     false
+    PRERELEASE:             false
+    VERSION_RC:             '1'
+    WORKER_ID:              'searxico'
+    FOLDER_DIST:            'dist'
+    BOT_NAME_1:             AdminServ
+    BOT_NAME_2:             AdminServX
+    BOT_NAME_3:             EuropaServ
+    BOT_NAME_DEPENDABOT:    dependabot[bot]
+
+# #
+#   jobs
+# #
+
+jobs:
+
+    # #
+    #   JOB > INITIALIZE
+    # #
+
+    job-initialize:
+        name: >-
+          📦 Initialize
+        runs-on: ubuntu-latest
+        outputs:
+          package_version: ${{ steps.task_initialize_package_version.outputs.PACKAGE_VERSION }}
+        permissions:
+            contents: write
+            packages: write
+        environment:
+            name: Orion
+        steps:
+
+            # #
+            #   Job > Initialize > Start
+            # #
+
+            - name: "✅ Start"
+              id: task_initialize_start
+              run: |
+                    echo "Starting build"
+
+            # #
+            #   Job > Initialize > Checkout
+            # #
+
+            - name: "☑️ Checkout"
+              id: task_initialize_checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            # #
+            #   Package Version > Set
+            #   Get version from package.json VERSION value
+            # #
+
+            - name: "👁️‍🗨️ Package Version › Get"
+              id: task_initialize_package_version
+              run: |
+                  VER=$(cat src/package.json | jq -r '.version')
+                  echo "PACKAGE_VERSION=$VER" >> $GITHUB_OUTPUT
+
+            # #
+            #   Package Version > Print (Debug)
+            # #
+
+            - name: "👁️‍🗨️ Package Version › Print"
+              id: task_initialize_package_version_debug
+              run: |
+                  echo "VERSION: ${{ steps.task_initialize_package_version.outputs.PACKAGE_VERSION }}"
+
+    # #
+    #   Job > Release > Cloudflare
+    # #
+
+    job-cloudflare:
+        name: >-
+          ☁️ Cloudflare Worker
+        needs: job-initialize
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        env:
+            PACKAGE_VERSION: ${{ needs.job-initialize.outputs.package_version }}
+        outputs:
+          cf_deploy_url: ${{ steps.task_cloudflare_deploy.outputs.deployment-url }}
+          guid: ${{ steps.task_release_dotenv_get.outputs.GUID }}
+          uuid: ${{ steps.task_release_dotenv_get.outputs.UUID }}
+        environment:
+            name: Orion
+        steps:
+
+            # #
+            #   Cloudflare Worker > Checkout
+            # #
+
+            - name: "☑️ Checkout"
+              id: task_cloudflare_checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            # #
+            #   Cloudflare Worker > Setup Node
+            # #
+
+            - name: "⚙️ Setup › Node"
+              id: task_cloudflare_node_setup
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20.x'
+                registry-url: https://npm.pkg.github.com/
+                scope: '@aetherinox'
+
+            # #
+            #   Cloudflare Worker > Install Node
+            # #
+
+            - name: "📦 NPM › Install"
+              id: task_cloudflare_npm_install
+              run: |
+                npm install
+              env:
+                NODE_AUTH_TOKEN: ${{ secrets.SELF_TOKEN_CL }}
+
+            # #
+            #   Cloudflare Worker > Run Prettier
+            # #
+
+            - name: "🪪 NPM › Pretty"
+              id: task_cloudflare_npm_prettylint
+              run: |
+                npm run pretty
+
+            # #
+            #   Release > Execute npm generate so that a uuid and guid can be created
+            # #
+
+            - name: "🪪 Generate IDs"
+              id: task_release_npm_env_generate
+              run: |
+                  npm run root:generate
+
+            # #
+            #   .ENV > Get
+            #   Get guid and uuid from env variable generated by npm
+            # #
+
+            - name: "🪪 .ENV › Get"
+              id: task_release_dotenv_get
+              uses: falti/dotenv-action@v1
+
+            # #
+            #   .ENV > Print (Debug)
+            #   Show guid and uuid from env variable generated by npm
+            # #
+
+            - name: "🪪 .ENV › Read"
+              id: task_dotenv_debug_print
+              run: |
+                  echo "GUID: ${{ steps.task_release_dotenv_get.outputs.GUID }}"
+                  echo "UUID: ${{ steps.task_release_dotenv_get.outputs.UUID }}"
+
+            # #
+            #   Build Project & Create Zip
+            # #
+
+            - name: "🔨 Build › Stable ( ${{ inputs.PLUGIN_NAME }}-${{ env.PACKAGE_VERSION }}.zip )"
+              id: task_release_build_st
+              if: ${{ startsWith( inputs.PRERELEASE, false ) }}
+              run: |
+                  echo Building STABLE Package .zip ${{ env.PACKAGE_VERSION }}
+                  zip -r ${{ inputs.PLUGIN_NAME }}-${{ env.PACKAGE_VERSION }}.zip package.json wrangler.toml .prettierrc README.md LICENSE src -x src/tests/**\*
+                  ls
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.ADMINSERV_TOKEN_CL }}
+
+            # #
+            #   Cloudflare Worker > Debug > Print pacakge Version
+            # #
+
+            - name: "☁️ Cloudflare › Version"
+              id: task_cloudflare_version
+              run: |
+                echo "VERSION: ${{ env.PACKAGE_VERSION }}"
+
+            # #
+            #   Cloudflare Worker > Deploy
+            #
+            #   ensure `environment` is set to production. options available:
+            #       - production
+            #       - dev
+            # #
+
+            - name: "☁️ Cloudflare › Deploy › ${{ github.event.inputs.ENVIRONMENT || 'production' }}"
+              id: task_cloudflare_deploy
+              uses: cloudflare/wrangler-action@v3
+              with:
+                apiToken: ${{ secrets.CF_TOKEN }}
+                accountId: ${{ secrets.CF_ACCOUNT_ID }}
+                workingDirectory: "src"
+                environment: 'production'
+                command: deploy --env ${{ github.event.inputs.ENVIRONMENT || 'production' }} --minify
+
+            # #
+            #   Cloudflare Worker > Deployment › Output
+            #
+            #   returns the deployment url
+            # #
+
+            - name: "☁️ Cloudflare › Deployment Output"
+              id: task_cloudflare_deploy_output
+              env:
+                  DEPLOYMENT_URL: ${{ steps.task_cloudflare_deploy.outputs.deployment-url }}
+              run: echo $DEPLOYMENT_URL
+
+    # #
+    #   JOB > COMPLETE
+    # #
+
+    job-complete:
+        name: >-
+          🆗 Successful Deployment
+        runs-on: ubuntu-latest
+        environment:
+            name: Orion
+        env:
+            GUID: ${{ needs.job-cloudflare.outputs.GUID }}
+            UUID: ${{ needs.job-cloudflare.outputs.UUID }}
+        steps:
+
+            # #
+            #   Job > Complete > Get publish timestamp
+            # #
+
+            - name: "🕛 Get Timestamp"
+              id: task_complete_timestamp_get
+              run: |
+                echo "NOW=$(date +'%m-%d-%Y %H:%M:%S')" >> $GITHUB_ENV
+
+            # #
+            #   Job > Complete > Cloudflare > Check Project
+            #   this step checks to see if your project already exists on cloudflare
+            #       today        date --utc +%FT%TZ
+            #       yesterday    date --utc -d '-1 day' '+%FT%TZ'
+            #
+            #   Endpoint `/workers/scripts/` requires Cloudflare API permission:
+            #       Workers Scripts:Read
+            #
+            #   Endpoint `https://api.cloudflare.com/client/v4/graphql` requires Cloudflare API permission:
+            #       Account Analytics:Read
+            # #
+
+            - name: "☁️ CF › Check Project"
+              id: task_complete_project_check
+              shell: bash
+              run: |
+                  yesturday=$(date --utc -d '-1 day' '+%FT%TZ')
+                  now=$(date --utc +%FT%TZ)
+
+                  worker_env=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/${{ env.WORKER_ID }}/settings/" \
+                    -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
+                    -H "Content-Type:application/json" | jq -r '.result.bindings[0].text')
+                  echo "WORKER_ENV=$worker_env" >> $GITHUB_ENV
+
+                  worker_compatdate=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/workers/scripts/${{ env.WORKER_ID }}/settings/" \
+                    -H "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
+                    -H "Content-Type:application/json" | jq -r '.result.compatibility_date')
+                  echo "WORKER_COMPATDATE=$worker_compatdate" >> $GITHUB_ENV
+
+                  API_JSON=$(echo "{ \"query\":
+                    \"query GetWorkersAnalytics(\$accountTag: string, \$datetimeStart: string, \$scriptName: string) {
+                      viewer {
+                        accounts(filter: {accountTag: \$accountTag}) {
+                          workersInvocationsAdaptive(limit: 1000, filter: {
+                            scriptName: \$scriptName,
+                            datetime_geq: \$datetimeStart,
+                            datetime_leq: \$datetimeEnd
+                          }) {
+                            sum {
+                              subrequests
+                              requests
+                              errors
+                            }
+                          }
+                        }
+                      }
+                    }\",
+                    \"variables\": {
+                      \"accountTag\": \"${{ secrets.CF_ACCOUNT_ID }}\",
+                      \"datetimeStart\": \"$yesturday\",
+                      \"datetimeEnd\": \"$now\",
+                      \"scriptName\": \"${{ env.WORKER_ID }}\"
+                    }
+                  }" | curl --silent \
+                  https://api.cloudflare.com/client/v4/graphql \
+                  --header "Authorization: Bearer ${{ secrets.CF_TOKEN }}" \
+                  --header "Accept: application/json" \
+                  --header "Content-Type: application/json" \
+                  --data @-)
+
+                  api_err=$(echo $API_JSON | jq -r ".data.viewer.accounts[0].workersInvocationsAdaptive[0].sum.errors")
+                  api_req=$(echo $API_JSON | jq -r ".data.viewer.accounts[0].workersInvocationsAdaptive[0].sum.requests")
+                  api_req_sub=$(echo $API_JSON | jq -r ".data.viewer.accounts[0].workersInvocationsAdaptive[0].sum.subrequests")
+
+                  echo "ENV_API_ERR=$api_err" >> $GITHUB_ENV
+                  echo "ENV_API_REQ=$api_req" >> $GITHUB_ENV
+                  echo "ENV_API_SUBREQ=$api_req_sub" >> $GITHUB_ENV
+
+            # #
+            #   Job > Complete > Summary of publish
+            # #
+
+            - name: "🆗 Completed: ${{ env.NOW }}"
+              id: task_complete_summary
+              run: |
+                  echo ""
+                  echo ""
+                  echo "| File                            | Result                        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| ------------------------------- | -----------------------       |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Project**                     | ${{ env.PLUGIN_NAME }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Deploy Time**                 | ${{ env.NOW }}                |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Compatibility Date**   | ${{ env.WORKER_COMPATDATE }}  |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker State**                | ${{ env.WORKER_ENV }}         |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Errors**               | ${{ env.ENV_API_ERR }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Requests**             | ${{ env.ENV_API_REQ }}        |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Worker Subrequests**          | ${{ env.ENV_API_SUBREQ }}     |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **GUID**                        | ${{ env.GUID }}               |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **UUID**                        | ${{ env.UUID }}               |" >> $GITHUB_STEP_SUMMARY
