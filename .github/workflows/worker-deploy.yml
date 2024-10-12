@@ -273,8 +273,8 @@ jobs:
         environment:
             name: Orion
         env:
-            GUID: ${{ needs.job-cloudflare.outputs.GUID }}
-            UUID: ${{ needs.job-cloudflare.outputs.UUID }}
+            GUID: ${{ needs.job-cloudflare.outputs.guid }}
+            UUID: ${{ needs.job-cloudflare.outputs.uuid }}
         steps:
 
             # #
