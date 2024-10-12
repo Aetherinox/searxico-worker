@@ -642,13 +642,13 @@ jobs:
             # #
             #   [ Lock Issues ] Look for inactives
             # #
-            
+
             - name: "🔒 Lock › Inactives"
               uses: dessant/lock-threads@v5
               id: task_issues_lock_run
               with:
-                  add-pr-labels: 'Status ↯ Locked'
-                  add-issue-labels: 'Status ↯ Locked'
+                  add-pr-labels: 'Status 𐄂 Locked'
+                  add-issue-labels: 'Status 𐄂 Locked'
                   github-token: ${{ secrets.ADMINSERV_TOKEN }}
                   issue-inactive-days: '180'
                   issue-lock-reason: 'resolved'
