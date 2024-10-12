@@ -82,8 +82,8 @@ const uriCDN = 'https://github.com/Aetherinox/searxico-cdn';
             search for an icon without a route path using domain.com/reddit.com
 */
 
-let bSubRoute = true;
-const route = 'favicon';
+let bSubRoute = false;
+const route = 'get';
 
 /*
     Maps
@@ -460,14 +460,12 @@ export default {
         const hostAbso = bSubRoute ? `${hostFull.origin}/${route}` : `${hostFull.origin}`   // http://127.0.0.1:8787/get
         const bIsHostBase = hostRegex.test(hostFull);                                       // triggered only when base URL is used without arguments
 
-        if ( env.ENVIRONMENT === "dev" ) {
-            Logger.var(env, 'host', `${host}`)
-            Logger.var(env, 'hostFull', `${hostFull}`)
-            Logger.var(env, 'hostBase', `${hostBase}`)
-            Logger.var(env, 'hostAbso', `${hostAbso}`)
-            Logger.var(env, 'route', `${route}`)
-            Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
-        }
+        Logger.var(env, 'host', `${host}`)
+        Logger.var(env, 'hostFull', `${hostFull}`)
+        Logger.var(env, 'hostBase', `${hostBase}`)
+        Logger.var(env, 'hostAbso', `${hostAbso}`)
+        Logger.var(env, 'route', `${route}`)
+        Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
 
         /*
             only returns when `?format` found in url
@@ -560,7 +558,7 @@ export default {
         if (bSubRoute) {
             paramDomain = hostFull.pathname.replace(`/${route}/`, '');
             if (!paramDomain || paramDomain === `/${route}`) {
-                return throwHelp(env, hostBase, host);
+                return throwHelp(env, hostAbso, host);
             }
         } else {
             // clean up forward slash

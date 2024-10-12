@@ -716,7 +716,7 @@ const template = ( console, domain, host ) =>`
         {
             const data = new FormData(form)
             //const response = await fetch( url )
-            document.getElementById("status").innerHTML = \`Fetching icon for <span class="url">\` + data.get("url") + \`</span>\`
+            document.getElementById("status").innerHTML = \`${host}\`
             window.location.href = \`${domain}\` + url
             console.textContent = \`${console}\`
         }
