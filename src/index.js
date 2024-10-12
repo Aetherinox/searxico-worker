@@ -9,10 +9,11 @@
                   own favicon grabber. includes support for SearXNG, as well
                   as a stand-alone service.
 
-    @USAGE      : https://sub.domain.com/get/<DOMAIN.COM>/<ICON_SIZE>
-                  https://searxico.aetherinox.workers.dev/get/
-                  https://searxico.aetherinox.workers.dev/get/domain.com/iconsize
-                  https://searxico.aetherinox.workers.dev/get/domain.com/64
+    @USAGE      : https://sub.domain.com/<DOMAIN.COM>/<ICON_SIZE>
+                  https://searxico.aetherinox.workers.dev/
+                  https://searxico.aetherinox.workers.dev/domain.com/iconsize
+                  https://searxico.aetherinox.workers.dev/domain.com/64
+                  https://searxico.aetherinox.workers.dev/microsoft.com/64/?format=json
 
     List of favicon services::
         - https://www.google.com/s2/favicons?domain_url={DOMAIN}&sz={ICON_SIZE}
@@ -21,7 +22,8 @@
         - http://favicon.yandex.net/favicon/{DOMAIN}
         - https://api.faviconkit.com/{DOMAIN}/{ICON_SIZE}
         - https://f1.allesedv.com/{DOMAIN}
-        - https://unavatar.now.sh/{DOMAIN} (rate limited)
+        - https://icon.horse/icon/{DOMAIN}      (free plan, 1000 icons/month)
+        - https://unavatar.now.sh/{DOMAIN}      (rate limited)
 
     Alternative examples
         - https://besticon-demo.herokuapp.com/
@@ -49,6 +51,7 @@ services['duckduckgo'] = 'https://icons.duckduckgo.com/ip3/{DOMAIN}.ico';
 services['yandex'] = 'http://favicon.yandex.net/favicon/{DOMAIN}';
 services['allesedv'] = 'https://f1.allesedv.com/{DOMAIN}';
 services['faviconkit'] = 'https://api.faviconkit.com/{DOMAIN}/{ICON_SIZE}';
+services['horse'] = 'https://icon.horse/icon/{DOMAIN}';
 
 /*
     Define > General
