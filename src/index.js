@@ -82,8 +82,8 @@ const uriCDN = 'https://github.com/Aetherinox/searxico-cdn';
             search for an icon without a route path using domain.com/reddit.com
 */
 
-let bSubRoute = false;
-const route = 'get';
+let bSubRoute = true;
+const route = 'favicon';
 
 /*
     Maps
