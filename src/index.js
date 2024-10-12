@@ -460,18 +460,23 @@ export default {
         const hostAbso = bSubRoute ? `${hostFull.origin}/${route}` : `${hostFull.origin}`   // http://127.0.0.1:8787/get
         const bIsHostBase = hostRegex.test(hostFull);                                       // triggered only when base URL is used without arguments
 
-        Logger.var(env, 'host', `${host}`)
-        Logger.var(env, 'hostFull', `${hostFull}`)
-        Logger.var(env, 'hostBase', `${hostBase}`)
-        Logger.var(env, 'hostAbso', `${hostAbso}`)
-        Logger.var(env, 'route', `${route}`)
-        Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
-
         /*
             only returns when `?format` found in url
         */
 
         const paramFormat = getParams(req.url, 'format')
+
+        /*
+            logging
+        */
+
+        Logger.var(env, 'host', `${host}`)
+        Logger.var(env, 'hostFull', `${hostFull}`)
+        Logger.var(env, 'hostBase', `${hostBase}`)
+        Logger.var(env, 'hostAbso', `${hostAbso}`)
+        Logger.var(env, 'route', `${route}`)
+        Logger.var(env, 'paramFormat', `${paramFormat}`)
+        Logger.var(env, 'bIsHostBase', `${bIsHostBase}`)
 
         /*
             Security Headers
@@ -1005,7 +1010,7 @@ export default {
                     const client = `${clientIp}`
                     const status = `${serviceResultIcon.status}`
 
-                    return jsonResp({ url, size, client, status }, true)
+                    return jsonResp({ url, size, client, status }, 200, true)
                 }
                 else
                 {
