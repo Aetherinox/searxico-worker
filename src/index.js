@@ -731,7 +731,52 @@ export default {
             })
         }
 
+        /*
+            target url / returns object
+                URL {
+                    origin: 'https://microsoft.com',
+                    href: 'https://microsoft.com/64',
+                    protocol: 'https:',
+                    username: '',
+                    password: '',
+                    host: 'microsoft.com',
+                    hostname: 'microsoft.com',
+                    port: '',
+                    pathname: '/64',
+                    search: '',
+                    hash: '',
+                    searchParams: URLSearchParams(0) {}
+                }
+        */
+
         const targetURL = new URL(url.startsWith('https') ? url : 'https://' + url);
+
+        /*
+            Split url by forward slash when URL provided in format of:
+                http://sub.domain.lan/favicon/127.0.0.1:8081
+                http://sub.domain.lan/favicon/microsoft.com/64
+
+            Example Returns:
+                [ '127.0.0.1:8081' ]
+                [ 'microsoft.com' ]
+                [ 'microsoft.com', '64' ]
+        */
+
+        const iconArgs = url.replace(/\\/g, '/').split('/');
+
+        /*
+            url should be in the format:
+                - http://sub.domain.lan/favicon/youtube.com/64
+                - http://sub.domain.lan/favicon/{DOMAIN}/{ICON_SIZE}
+
+            since users may add long and complex URLs to their vault, check if the 2nd argument
+            is a number to represent the icon size; if not, set the default icon size.
+        */
+
+        let iconSize = 32;
+        if (iconArgs[1]) {
+            iconSize = iconArgs[1];
+        }
 
         /*
             check if response already exists in cache
@@ -768,7 +813,15 @@ export default {
         }
 
         /*
-            get domain icon short name
+            CDN > Get storage path location
+
+            this is used to determine if we are hosting a domain's icon within our Github CDN. Also used for localhost icons hosted on the github repo which begin with 127.0.0.1
+
+            base                used to gen folder name, first letter               127
+            iconName            github cdn file name for icon                       127.0.0.1-8081
+            baseFolder          github cdn folder to fetch icon                     1
+            iconPath            github cdn folder and full path to fetch icon       1/127.0.0.1-8081
+            iconUrl             github cdn full path to fetch icon                  https://raw.githubusercontent.com/keeweb/keeweb-favicon-cdn/main/1/127.0.0.1-8081.ico
         */
 
         const [base, iconName] = handleIconName(targetURL.origin);
@@ -809,6 +862,24 @@ export default {
 
             const fetchIcoCdn = await fetch(`${iconUrl}`);
             if (fetchIcoCdn && fetchIcoCdn.status === 200) {
+
+                /*
+                    CDN Icon > JSON
+                */
+
+                if (paramFormat === 'json') {
+                    const url = `${fetchIcoCdn.url}`
+                    const size = `${iconSize}`
+                    const client = `${clientIp}`
+                    const status = `${fetchIcoCdn.status}`
+
+                    return jsonResp({ url, size, client, status }, 200, true)
+                }
+
+                /*
+                    CDN Icon > Normal
+                */
+
                 let resp = new Response(fetchIcoCdn.body, {
                     headers: {
                         'content-type': types.icon,
@@ -886,29 +957,6 @@ export default {
             });
 
             return customSvgIcon;
-        }
-
-        /*
-            Split url by forward slash.
-
-            should return
-            - youtube.com,64
-        */
-
-        const iconArgs = url.replace(/\\/g, '/').split('/');
-
-        /*
-            url should be in the format:
-                - http://sub.domain.lan/get/youtube.com/64
-                - http://sub.domain.lan/get/{DOMAIN}/{ICON_SIZE}
-
-            since users may add long and complex URLs to their vault, check if the 2nd argument
-            is a number to represent the icon size; if not, set the default icon size.
-        */
-
-        let iconSize = 32;
-        if (iconArgs[1]) {
-            iconSize = iconArgs[1];
         }
 
         /*
@@ -1041,6 +1089,7 @@ export default {
                     }
                 }
             });
+            // .transform(response);
 
             // must be called before getting favicon variable
             const _text = await newResponse.transform(response).text();
