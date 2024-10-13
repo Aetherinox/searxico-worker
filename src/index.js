@@ -811,6 +811,7 @@ export default {
             if (fetchIcoCdn && fetchIcoCdn.status === 200) {
                 let resp = new Response(fetchIcoCdn.body, {
                     headers: {
+                        'content-type': types.icon,
                         ...DEFAULT_CORS_HEADERS
                     }
                 });
