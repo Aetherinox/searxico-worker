@@ -285,3 +285,5 @@ dist
 
 .dev.vars
 .wrangler/
+
+.github/workflows/issues-stale-simple.yml
