@@ -16,7 +16,11 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 
 <br />
 
+<div align="center">
+
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
+
+</div>
 
 <br />
 
@@ -85,7 +89,11 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 ## Install
 To automatically deploy this Cloudflare worker with minimal setup, click the link below:
 
+<div align="center">
+
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Aetherinox/searxico-worker)
+
+</div>
 
 <br />
 
