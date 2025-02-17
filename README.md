@@ -15,6 +15,7 @@ A self-hosted Cloudflare worker for SearXNG which allows you to run your own fav
 <img src="https://raw.githubusercontent.com/Aetherinox/searxico-worker/refs/heads/main/docs/img/banner.png" height="230">
 
 <br />
+<br />
 
 <div align="center">
 
