@@ -648,7 +648,7 @@ jobs:
 
             - name: "📁 Download › Saved Artifacts"
               id: task_complete_artifacts_download
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v6
 
             # #
             #   Job > Complete > Get publish timestamp
