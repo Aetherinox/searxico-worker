@@ -68,7 +68,7 @@
         "prettier": "^3.5.3",
         "rollup-plugin-node-polyfills": "^0.2.1",
         "uuid": "^10.0.0",
-        "wrangler": "^3.80.4"
+        "wrangler": "^4.45.3"
     },
     "overrides": {
         "wrangler": {
